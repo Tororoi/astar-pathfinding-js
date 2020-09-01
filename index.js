@@ -91,6 +91,7 @@ function selectColor(e) {
 }
 //--------------------------------Grid------------------------------------//
 let gameGrid = [];
+let walls = [];
 
 function generateMap(e) {
   let imageData = offScreenCTX.getImageData(0,0,offScreenCVS.width,offScreenCVS.height);
@@ -112,6 +113,7 @@ function generateMap(e) {
       case "rgba(0, 0, 0, 255)":
         //black pixel
         gameGrid[y][x].type = "wall";
+        walls.push(gameGrid[y][x])
         break;
       case "rgba(255, 165, 0, 255)":
         //orange pixel
@@ -158,8 +160,8 @@ function findPath() {
     function recursiveLoop() {
         stop+=1;
         //Make a list from open set
-        console.log("step",stop)
-        console.log("open set", open)
+        // console.log("step",stop)
+        // console.log("open set", open)
         //Get lowest fCost for processing
         //Grab open Node with lowest fCost to process next
         function compareFCost(obj1,obj2) {
@@ -177,9 +179,16 @@ function findPath() {
               onScreenCTX.stroke();
             }
         }
+        walls.forEach(w => {
+            onScreenCTX.fillStyle = "black";
+            onScreenCTX.fillRect(w.x*32+1,w.y*32+1,30,30);
+        })
         open.forEach(n => {
             onScreenCTX.fillStyle = "green";
             onScreenCTX.fillRect(n.x*32+1,n.y*32+1,30,30);
+            onScreenCTX.fillStyle = "black";
+            onScreenCTX.font = "12px Arial";
+            onScreenCTX.fillText(Math.round(n.fCost*10)/10, n.x*32,n.y*32+16);
         });
         closed.forEach(n => {
             onScreenCTX.fillStyle = "red";
@@ -206,6 +215,10 @@ function findPath() {
                 curr = curr.parent;
                 n+=1;
             }
+            path.reverse().forEach(t => {
+                onScreenCTX.fillStyle = "pink"
+                onScreenCTX.fillRect(t.x*32+1,t.y*32+1,30,30)
+            })
             return path.reverse();
         }
         //Eight neighbors
@@ -247,7 +260,7 @@ function findPath() {
 
         for (let i=0; i<neighbors.length; i++) {
             let neighbor = neighbors[i];
-            if (neighbor.type != "free"||closed.has(neighbor)) {
+            if (neighbor.type === "wall"||closed.has(neighbor)) {
                 continue;
             }
             neighbor.gCost = getDistance(neighbor.x,neighbor.y,start.x,start.y);
@@ -263,7 +276,8 @@ function findPath() {
             if (closed.has(neighbor)&&neighbor.hCost < cost) {
                 closed.delete(neighbor);
             }
-            if (!(open.has(neighbor)&&closed.has(neighbor))) {
+            //For new tiles
+            if (!(open.has(neighbor)||closed.has(neighbor))) {
                 if (!neighbor.parent&&neighbor!=start) {neighbor.parent = current;}
                 cost = neighbor.hCost;
                 open.add(neighbor);
@@ -273,7 +287,7 @@ function findPath() {
         let arr = [...open]
         arr.sort(compareFCost)
         current = arr[0]
-        if (stop<100&&open.size>0) setTimeout(recursiveLoop, 3000);
+        if (stop<100&&open.size>0) {setTimeout(recursiveLoop, 1000)};
     }
     // }
 }
@@ -285,9 +299,10 @@ generateBtn.addEventListener("click", drawPath);
 
 function drawPath() {
     let path = findPath();
-    console.log(path)
-    // path.forEach(t => {
-    //     onScreenCTX.fillStyle = "pink"
-    //     onScreenCTX.fillRect(t.x*32+1,t.y*32+1,30,30)
-    // })
+    // if (path) {
+    //     path.forEach(t => {
+    //         onScreenCTX.fillStyle = "pink"
+    //         onScreenCTX.fillRect(t.x*32+1,t.y*32+1,30,30)
+    //     })
+    // }
 }

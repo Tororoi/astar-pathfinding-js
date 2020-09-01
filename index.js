@@ -8,11 +8,11 @@ let onScreenCTX = onScreenCVS.getContext("2d");
 let offScreenCVS = document.createElement('canvas');
 let offScreenCTX = offScreenCVS.getContext("2d");
 
+//Set Tile Size
+let tileSize = 16;
 //Set the dimensions of the drawing canvas
 offScreenCVS.width = 32;
 offScreenCVS.height = 20;
-
-let tileSize = 16;
 
 //Create an Image with a default source of the existing onscreen canvas
 let img = new Image;
@@ -157,11 +157,17 @@ function findPath() {
     let closed = new Set();
     let current = start;
     let pathCost = 0;
-    //Get lowest fCost for processing
+    //Rank by fCost, then hCost if equal.
     function compareFCost(obj1,obj2) {
-        if (obj1.fCost > obj2.fCost) {
+        if (obj1.fCost === obj2.fCost) {
+            if (obj1.hCost > obj2.hCost) {
+                return 1;
+            } else {
+                return -1;
+            }
+        } else if (obj1.fCost > obj2.fCost) {
             return 1;
-        } else {
+        } else if (obj1.fCost < obj2.fCost) {
             return -1;
         }
     }
@@ -206,7 +212,6 @@ function findPath() {
     // while (open.size>0&&stop<100) {
     recursiveLoop();
     function recursiveLoop() {
-        console.log(stepCount)
         stepCount += 1;
         //-------------------------Draw Progress------------------------//
         onScreenCTX.clearRect(0,0,512,320)
@@ -225,8 +230,9 @@ function findPath() {
             onScreenCTX.fillStyle = "green";
             onScreenCTX.fillRect(n.x*tileSize+1,n.y*tileSize+1,tileSize-2,tileSize-2);
             onScreenCTX.fillStyle = "black";
-            onScreenCTX.font = "12px Arial";
+            onScreenCTX.font = `${tileSize/3}px Arial`;
             onScreenCTX.fillText(Math.round(n.fCost*10)/10, n.x*tileSize,n.y*tileSize+(tileSize/2));
+            onScreenCTX.fillText(Math.round(n.hCost*10)/10, n.x*tileSize,n.y*tileSize+(tileSize));
         });
         closed.forEach(n => {
             onScreenCTX.fillStyle = "red";
@@ -253,12 +259,16 @@ function findPath() {
         onScreenCTX.fillRect(end.x*tileSize+1,end.y*tileSize+1,tileSize-2,tileSize-2);
         onScreenCTX.fillStyle = "purple";
         onScreenCTX.fillRect(current.x*tileSize+1,current.y*tileSize+1,tileSize-2,tileSize-2);
+        onScreenCTX.fillStyle = "black";
+        onScreenCTX.fillText(Math.round(current.fCost*10)/10, current.x*tileSize,current.y*tileSize+(tileSize/2));
+        onScreenCTX.fillText(Math.round(current.hCost*10)/10, current.x*tileSize,current.y*tileSize+(tileSize));
         //------------------------Drawing Done----------------------------//
         //Remove lowest fCost from open and add it to closed
         open.delete(current);
         closed.add(current);
         //End case
         if (current === end) {
+            console.log("steps:", stepCount)
             let curr = current;
             let tempPath = [];
             while(curr.parent) {
@@ -266,8 +276,8 @@ function findPath() {
                 curr = curr.parent;
             }
             //-------------------Draw Path-----------------------//
-            let truePath = tempPath.reverse()
-            drawPath(truePath, 100);
+            let truePath = tempPath.reverse();
+            drawPath(truePath, 50);
             return truePath;
         }
         //Eight neighbors
@@ -320,9 +330,9 @@ function findPath() {
             if (!(open.has(neighbor)||closed.has(neighbor))) {
                 if (neighbor!=start) {neighbor.parent = current;}
                 open.add(neighbor);
-                neighbor.gCost = pathCost+tCost;
+                neighbor.gCost = Math.round((pathCost+tCost)*100)/100;
                 // neighbor.hCost = getDistance(neighbor.x,neighbor.y,end.x,end.y);
-                neighbor.hCost = calcHCost();
+                neighbor.hCost = Math.round(calcHCost()*100)/100;
                 function calcHCost() {
                     let a = Math.abs(neighbor.x - end.x);
                     let b = Math.abs(neighbor.y - end.y);
@@ -333,11 +343,11 @@ function findPath() {
                     let horizontalCost = Math.abs(b-a);
                     return diagonalCost+horizontalCost;
                 }
-                neighbor.fCost = neighbor.gCost+neighbor.hCost;
+                neighbor.fCost = Math.round((neighbor.gCost+neighbor.hCost)*100)/100;
             } else if (open.has(neighbor)&&neighbor.gCost > current.gCost+tCost) {
                 if (neighbor!=start) {neighbor.parent = current;}
-                neighbor.gCost = pathCost+tCost;
-                neighbor.fCost = neighbor.gCost+neighbor.hCost;
+                neighbor.gCost = Math.round((pathCost+tCost)*100)/100;
+                neighbor.fCost = Math.round((neighbor.gCost+neighbor.hCost)*100)/100;
             }
             // if neighbor is in closed but it's closer to the start, remove from closed set
             // if (closed.has(neighbor)&&neighbor.gCost < current.gCost) {
@@ -350,7 +360,6 @@ function findPath() {
         let arr = [...open]
         arr.sort(compareFCost)
         current = arr[0]
-        // console.log(current,arr)
         if (open.size>0) {setTimeout(recursiveLoop, 100)};
     }
     // }

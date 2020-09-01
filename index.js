@@ -312,7 +312,7 @@ function findPath() {
         //current is in closed set x
         for (let i=0; i<neighbors.length; i++) {
             let neighbor = neighbors[i];
-            if (neighbor.type === "wall") {
+            if (neighbor.type === "wall" || closed.has(neighbor)) {
                 continue;
             }
             let tCost = getDistance(neighbor.x,neighbor.y,current.x,current.y);

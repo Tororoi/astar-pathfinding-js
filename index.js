@@ -282,36 +282,45 @@ function findPath() {
         }
         //Eight neighbors
         let neighbors = [];
+        let east,west,south,north,northeast,northwest,southeast,southwest;
         if (gameGrid[current.y][current.x+1]) {
             //east
-            neighbors.push(gameGrid[current.y][current.x+1]);
+            east = gameGrid[current.y][current.x+1];
+            neighbors.push(east);
         }
         if (gameGrid[current.y][current.x-1]) {
             //west
-            neighbors.push(gameGrid[current.y][current.x-1]);
+            west = gameGrid[current.y][current.x-1];
+            neighbors.push(west);
         }
         if (gameGrid[current.y+1]) {
             //south
-            neighbors.push(gameGrid[current.y+1][current.x]);
+            south = gameGrid[current.y+1][current.x];
+            neighbors.push(south);
             if (gameGrid[current.y+1][current.x-1]) {
                 //southwest
-                neighbors.push(gameGrid[current.y+1][current.x-1]);
+                southwest = gameGrid[current.y+1][current.x-1];
+                neighbors.push(southwest);
             }
             if (gameGrid[current.y+1][current.x+1]) {
                 //southeast
-                neighbors.push(gameGrid[current.y+1][current.x+1]);
+                southeast = gameGrid[current.y+1][current.x+1];
+                neighbors.push(southeast);
             }
         }
         if (gameGrid[current.y-1]) {
             //north
-            neighbors.push(gameGrid[current.y-1][current.x]);
+            north = gameGrid[current.y-1][current.x];
+            neighbors.push(north);
             if (gameGrid[current.y-1][current.x-1]) {
                 //northwest
-                neighbors.push(gameGrid[current.y-1][current.x-1]);
+                northwest = gameGrid[current.y-1][current.x-1];
+                neighbors.push(northwest);
             }
             if (gameGrid[current.y-1][current.x+1]) {
                 //northeast
-                neighbors.push(gameGrid[current.y-1][current.x+1]);
+                northeast = gameGrid[current.y-1][current.x+1];
+                neighbors.push(northeast);
             }
         }
 
@@ -325,14 +334,36 @@ function findPath() {
             if (neighbor.type === "wall" || closed.has(neighbor)) {
                 continue;
             }
+            //Check corners
+            if (neighbor === northeast) {
+                if ((north.type === "wall")&&(east.type === "wall")) {
+                    continue;
+                }
+            }
+            if (neighbor === northwest) {
+                if ((north.type === "wall")&&(west.type === "wall")) {
+                    continue;
+                }
+            }
+            if (neighbor === southeast) {
+                if ((south.type === "wall")&&(east.type === "wall")) {
+                    continue;
+                }
+            }
+            if (neighbor === southwest) {
+                if ((south.type === "wall")&&(west.type === "wall")) {
+                    continue;
+                }
+            }
             let tCost = getDistance(neighbor.x,neighbor.y,current.x,current.y);
             //For new tiles
             if (!(open.has(neighbor)||closed.has(neighbor))) {
                 if (neighbor!=start) {neighbor.parent = current;}
                 open.add(neighbor);
-                neighbor.gCost = Math.round((pathCost+tCost)*100)/100;
+                //Round the costs to take care of floating point errors.
+                neighbor.gCost = Math.floor((pathCost+tCost)*100)/100;
                 // neighbor.hCost = getDistance(neighbor.x,neighbor.y,end.x,end.y);
-                neighbor.hCost = Math.round(calcHCost()*100)/100;
+                neighbor.hCost = Math.floor(calcHCost()*100)/100;
                 function calcHCost() {
                     let a = Math.abs(neighbor.x - end.x);
                     let b = Math.abs(neighbor.y - end.y);
@@ -343,11 +374,11 @@ function findPath() {
                     let horizontalCost = Math.abs(b-a);
                     return diagonalCost+horizontalCost;
                 }
-                neighbor.fCost = Math.round((neighbor.gCost+neighbor.hCost)*100)/100;
+                neighbor.fCost = Math.floor((neighbor.gCost+neighbor.hCost)*100)/100;
             } else if (open.has(neighbor)&&neighbor.gCost > current.gCost+tCost) {
                 if (neighbor!=start) {neighbor.parent = current;}
-                neighbor.gCost = Math.round((pathCost+tCost)*100)/100;
-                neighbor.fCost = Math.round((neighbor.gCost+neighbor.hCost)*100)/100;
+                neighbor.gCost = Math.floor((pathCost+tCost)*100)/100;
+                neighbor.fCost = Math.floor((neighbor.gCost+neighbor.hCost)*100)/100;
             }
             // if neighbor is in closed but it's closer to the start, remove from closed set
             // if (closed.has(neighbor)&&neighbor.gCost < current.gCost) {
@@ -360,7 +391,7 @@ function findPath() {
         let arr = [...open]
         arr.sort(compareFCost)
         current = arr[0]
-        if (open.size>0) {setTimeout(recursiveLoop, 100)};
+        if (open.size>0) {setTimeout(recursiveLoop, 50)};
     }
     // }
 }

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Dungeon Maker is a modular dungeon making game. Draw a color map of a top-down view of your dungeon to generate your dungeon."
+    />
+    <link rel="stylesheet" href="style.css">
+    <script defer src="index.js"></script>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div class="generator-container">
+        <canvas class="map" width="512px" height="320px"></canvas>
+        <div class="color-select">
+            <div class="color">
+                <div class="swatch" id="transparent"></div>
+                <p>Eraser</p>
+            </div>
+            <div class="color">
+                <div class="swatch" id="orange"></div>
+                <p>Start</p>
+            </div>
+            <div class="color">
+                <div class="swatch" id="blue"></div>
+                <p>End</p>
+            </div>
+            <div class="color">
+                <div class="swatch" id="black"></div>
+                <p>Wall</p>
+            </div>
+        </div>
+    </div>
+    <button class="generate-btn">Find Path</button>
+  </body>
+</html>

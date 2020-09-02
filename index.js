@@ -52,9 +52,33 @@ function handleMouseUp() {
 function draw(e) {
     let ratio = onScreenCVS.width/offScreenCVS.width;
     if (offScreenCTX.fillStyle === "rgba(0, 0, 0, 0)") {
-      offScreenCTX.clearRect(Math.floor(e.offsetX/ratio),Math.floor(e.offsetY/ratio),1,1);
+        offScreenCTX.clearRect(Math.floor(e.offsetX/ratio),Math.floor(e.offsetY/ratio),1,1);
+    } else if (offScreenCTX.fillStyle === "#ffa500") {
+        let imageData = offScreenCTX.getImageData(0,0,offScreenCVS.width,offScreenCVS.height);
+        for (let i=0; i<imageData.data.length; i+=4) {
+            let x = i/4%offScreenCVS.width, y = (i/4-x)/offScreenCVS.width;
+            let color = `rgba(${imageData.data[i]}, ${imageData.data[i+1]}, ${imageData.data[i+2]}, ${imageData.data[i+3]})`
+            //Clear other pixels of same color
+            if (color === "rgba(255, 165, 0, 255)") {
+                offScreenCTX.clearRect(x,y,1,1);
+            }
+        }
+        //Draw pixel
+        offScreenCTX.fillRect(Math.floor(e.offsetX/ratio),Math.floor(e.offsetY/ratio),1,1);
+    } else if (offScreenCTX.fillStyle === "#0000ff") {
+        let imageData = offScreenCTX.getImageData(0,0,offScreenCVS.width,offScreenCVS.height);
+        for (let i=0; i<imageData.data.length; i+=4) {
+          let x = i/4%offScreenCVS.width, y = (i/4-x)/offScreenCVS.width;
+          let color = `rgba(${imageData.data[i]}, ${imageData.data[i+1]}, ${imageData.data[i+2]}, ${imageData.data[i+3]})`
+          //Clear other pixels of same color
+          if (color === "rgba(0, 0, 255, 255)") {
+              offScreenCTX.clearRect(x,y,1,1);
+          }
+        }
+        //Draw pixel
+        offScreenCTX.fillRect(Math.floor(e.offsetX/ratio),Math.floor(e.offsetY/ratio),1,1);
     } else {
-      offScreenCTX.fillRect(Math.floor(e.offsetX/ratio),Math.floor(e.offsetY/ratio),1,1);
+        offScreenCTX.fillRect(Math.floor(e.offsetX/ratio),Math.floor(e.offsetY/ratio),1,1);
     }
     //Set the source of the image to the offscreen canvas
     source = offScreenCVS.toDataURL();
@@ -107,6 +131,8 @@ function generateMap(e) {
         onScreenCTX.stroke();
       }
   }
+  //Reset walls
+  walls = [];
   //Iterate through pixels and make objects each time a color matches
   for (let i=0; i<imageData.data.length; i+=4) {
     let x = i/4%offScreenCVS.width, y = (i/4-x)/offScreenCVS.width;
@@ -151,12 +177,24 @@ function findPath() {
     let open = new Set();
     open.add(start);
     start.gCost = 0;
-    start.hCost = getDistance(start.x,start.y,end.x,end.y);
+    start.hCost = Math.floor(calcHCost(start)*100)/100;
     start.fCost = start.gCost+start.hCost;
     //empty set
     let closed = new Set();
     let current = start;
     let pathCost = 0;
+
+    //Calculate hCost
+    function calcHCost(node) {
+        let a = Math.abs(node.x - end.x);
+        let b = Math.abs(node.y - end.y);
+        function leastSide() {
+            if (a > b) {return b;} else {return a;}
+        }
+        let diagonalCost = leastSide()*Math.sqrt(2);
+        let horizontalCost = Math.abs(b-a);
+        return diagonalCost+horizontalCost;
+    }
     //Rank by fCost, then hCost if equal.
     function compareFCost(obj1,obj2) {
         if (obj1.fCost === obj2.fCost) {
@@ -230,9 +268,8 @@ function findPath() {
             onScreenCTX.fillStyle = "green";
             onScreenCTX.fillRect(n.x*tileSize+1,n.y*tileSize+1,tileSize-2,tileSize-2);
             onScreenCTX.fillStyle = "black";
-            onScreenCTX.font = `${tileSize/3}px Arial`;
+            onScreenCTX.font = `${tileSize/2}px Arial`;
             onScreenCTX.fillText(Math.round(n.fCost*10)/10, n.x*tileSize,n.y*tileSize+(tileSize/2));
-            onScreenCTX.fillText(Math.round(n.hCost*10)/10, n.x*tileSize,n.y*tileSize+(tileSize));
         });
         closed.forEach(n => {
             onScreenCTX.fillStyle = "red";
@@ -261,7 +298,6 @@ function findPath() {
         onScreenCTX.fillRect(current.x*tileSize+1,current.y*tileSize+1,tileSize-2,tileSize-2);
         onScreenCTX.fillStyle = "black";
         onScreenCTX.fillText(Math.round(current.fCost*10)/10, current.x*tileSize,current.y*tileSize+(tileSize/2));
-        onScreenCTX.fillText(Math.round(current.hCost*10)/10, current.x*tileSize,current.y*tileSize+(tileSize));
         //------------------------Drawing Done----------------------------//
         //Remove lowest fCost from open and add it to closed
         open.delete(current);
@@ -325,10 +361,7 @@ function findPath() {
         }
 
         pathCost = calcPath();
-        //At this point, I have:
-        //neighbors x
-        //cost of path to current tile x
-        //current is in closed set x
+
         for (let i=0; i<neighbors.length; i++) {
             let neighbor = neighbors[i];
             if (neighbor.type === "wall" || closed.has(neighbor)) {
@@ -363,29 +396,13 @@ function findPath() {
                 //Round the costs to take care of floating point errors.
                 neighbor.gCost = Math.floor((pathCost+tCost)*100)/100;
                 // neighbor.hCost = getDistance(neighbor.x,neighbor.y,end.x,end.y);
-                neighbor.hCost = Math.floor(calcHCost()*100)/100;
-                function calcHCost() {
-                    let a = Math.abs(neighbor.x - end.x);
-                    let b = Math.abs(neighbor.y - end.y);
-                    function leastSide() {
-                        if (a > b) {return b;} else {return a;}
-                    }
-                    let diagonalCost = leastSide()*Math.sqrt(2);
-                    let horizontalCost = Math.abs(b-a);
-                    return diagonalCost+horizontalCost;
-                }
+                neighbor.hCost = Math.floor(calcHCost(neighbor)*100)/100;
                 neighbor.fCost = Math.floor((neighbor.gCost+neighbor.hCost)*100)/100;
             } else if (open.has(neighbor)&&neighbor.gCost > current.gCost+tCost) {
                 if (neighbor!=start) {neighbor.parent = current;}
                 neighbor.gCost = Math.floor((pathCost+tCost)*100)/100;
                 neighbor.fCost = Math.floor((neighbor.gCost+neighbor.hCost)*100)/100;
             }
-            // if neighbor is in closed but it's closer to the start, remove from closed set
-            // if (closed.has(neighbor)&&neighbor.gCost < current.gCost) {
-            //     closed.delete(neighbor);
-            //     open.add(neighbor)
-            // }
-
         }
         //make current lowest fCost
         let arr = [...open]
@@ -401,12 +418,8 @@ let generateBtn = document.querySelector(".generate-btn")
 
 generateBtn.addEventListener("click", drawPath);
 
+generateMap();
+
 function drawPath() {
-    let path = findPath();
-    // if (path) {
-    //     path.forEach(t => {
-    //         onScreenCTX.fillStyle = "pink"
-    //         onScreenCTX.fillRect(t.x*32+1,t.y*32+1,30,30)
-    //     })
-    // }
+    findPath();
 }

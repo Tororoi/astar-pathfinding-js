@@ -143,10 +143,21 @@ function updateTiles(e) {
 //Heuristics
 let hButtons = document.querySelector('#heuristic');
 
+hButtons.addEventListener('input',updateHeuristic);
+
+function updateHeuristic(e) {
+    if (e.target.value === "octile") {
+        calcHCost = octile;
+    } else if (e.target.value === "euclidean") {
+        calcHCost = euclid;
+    }
+}
+
 //fCost Calc Methods
 let fButtons = document.querySelector('#fCost');
 
 fButtons.addEventListener('input',updateFCalc);
+
 function updateFCalc(e) {
     if (e.target.value === "ignoreG") {
         calcFCost = ignoreG;
@@ -221,7 +232,7 @@ function crossBreak(node) {
 //Prioritize closest to goal
 function proximBreak(node) {
     //dwarf gCost
-    return calcHCost(node, end)*10;
+    return euclid(node, end)*0.001;
 }
 //No Tie Break
 function noBreak(node) {

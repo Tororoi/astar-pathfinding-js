@@ -115,8 +115,63 @@ function selectColor(e) {
     } 
   });
 }
+//----------------------------Calc Functions------------------------------//
+//********* Calculate gCost ***********//
+let calcGCost = calcPath;
+//Calculate path distance
+function calcPath(node) {
+    let curr = node;
+    let cost = 0;
+    while(curr.parent) {
+        let step = Math.floor(euclid(curr,curr.parent)*100)/100;
+        cost += step;
+        curr = curr.parent;   
+    }
+    return cost;
+}
+//********* Calculate hCost ***********//
+//node1 is current node, node2 is end node
+let calcHCost = octile;
+//Manhattan Distance (without diagonal movement)
+function manhattan(node1, node2) {
+    let a = Math.abs(node1.x - node2.x);
+    let b = Math.abs(node1.y - node2.y);
+    return a+b;
+}
+//Octile Distance (with diagonal movement)
+function octile(node1, node2) {
+    let a = Math.abs(node1.x - node2.x);
+    let b = Math.abs(node1.y - node2.y);
+    function leastSide() {
+        if (a > b) {return b;} else {return a;}
+    }
+    let diagonalCost = Math.floor(leastSide()*Math.sqrt(2)*100)/100;
+    let horizontalCost = Math.abs(b-a);
+    return diagonalCost+horizontalCost;
+}
+//Euclidean Distance (with diagonal movement)
+function euclid(node1, node2) {
+    return Math.hypot(node1.x - node2.x,node1.y - node2.y);
+}
+//********* fCost Tie Breakers ***********//
+let tieBreak = compareFCost;
+//Rank by fCost, then hCost if equal.
+function compareFCost(obj1,obj2) {
+    if (obj1.fCost === obj2.fCost) {
+        if (obj1.hCost > obj2.hCost) {
+            return 1;
+        } else {
+            return -1;
+        }
+    } else if (obj1.fCost > obj2.fCost) {
+        return 1;
+    } else if (obj1.fCost < obj2.fCost) {
+        return -1;
+    }
+}
 //--------------------------------Grid------------------------------------//
 let gameGrid = [];
+//walls list for drawing during pathfinding steps
 let walls = [];
 
 function generateMap(e) {
@@ -163,65 +218,17 @@ let start = {};
 let end = {};
 
 function findPath() {
-    //Set current Tile
-    if (this.currentTile != start) {
-        this.previousTile = this.currentTile;
-        this.currentTile = start;
-    }
     //Search
-    //calculate cost
-    function getDistance(x1,y1,x2,y2) {
-        return Math.hypot(x1-x2,y1-y2);
-    }
     //Priority queue
     let open = new Set();
     open.add(start);
     start.gCost = 0;
-    start.hCost = Math.floor(calcHCost(start)*100)/100;
+    start.hCost = calcHCost(start, end);
     start.fCost = start.gCost+start.hCost;
     //empty set
     let closed = new Set();
     let current = start;
-    let pathCost = 0;
 
-    //Calculate hCost
-    function calcHCost(node) {
-        let a = Math.abs(node.x - end.x);
-        let b = Math.abs(node.y - end.y);
-        function leastSide() {
-            if (a > b) {return b;} else {return a;}
-        }
-        let diagonalCost = leastSide()*Math.sqrt(2);
-        let horizontalCost = Math.abs(b-a);
-        return diagonalCost+horizontalCost;
-    }
-    //Rank by fCost, then hCost if equal.
-    function compareFCost(obj1,obj2) {
-        if (obj1.fCost === obj2.fCost) {
-            if (obj1.hCost > obj2.hCost) {
-                return 1;
-            } else {
-                return -1;
-            }
-        } else if (obj1.fCost > obj2.fCost) {
-            return 1;
-        } else if (obj1.fCost < obj2.fCost) {
-            return -1;
-        }
-    }
-    //Calculate path distance
-    function calcPath() {
-        let curr = current;
-        let path = [];
-        let cost = 0;
-        while(curr.parent) {
-            path.push(curr);
-            let step = getDistance(curr.x,curr.y,curr.parent.x,curr.parent.y);
-            cost += step;
-            curr = curr.parent;   
-        }
-        return cost;
-    }
     //Draw Path
     function drawPath(path,delay) {
         let pathIndex = 0;
@@ -360,8 +367,6 @@ function findPath() {
             }
         }
 
-        pathCost = calcPath();
-
         for (let i=0; i<neighbors.length; i++) {
             let neighbor = neighbors[i];
             if (neighbor.type === "wall" || closed.has(neighbor)) {
@@ -388,25 +393,24 @@ function findPath() {
                     continue;
                 }
             }
-            let tCost = getDistance(neighbor.x,neighbor.y,current.x,current.y);
+            let tCost = Math.floor(euclid(neighbor,current)*100)/100;
             //For new tiles
             if (!(open.has(neighbor)||closed.has(neighbor))) {
                 if (neighbor!=start) {neighbor.parent = current;}
                 open.add(neighbor);
                 //Round the costs to take care of floating point errors.
-                neighbor.gCost = Math.floor((pathCost+tCost)*100)/100;
-                // neighbor.hCost = getDistance(neighbor.x,neighbor.y,end.x,end.y);
-                neighbor.hCost = Math.floor(calcHCost(neighbor)*100)/100;
-                neighbor.fCost = Math.floor((neighbor.gCost+neighbor.hCost)*100)/100;
+                neighbor.gCost = calcGCost(neighbor);
+                neighbor.hCost = calcHCost(neighbor, end);
+                neighbor.fCost = neighbor.gCost+neighbor.hCost;
             } else if (open.has(neighbor)&&neighbor.gCost > current.gCost+tCost) {
                 if (neighbor!=start) {neighbor.parent = current;}
-                neighbor.gCost = Math.floor((pathCost+tCost)*100)/100;
-                neighbor.fCost = Math.floor((neighbor.gCost+neighbor.hCost)*100)/100;
+                neighbor.gCost = calcGCost(neighbor);
+                neighbor.fCost = neighbor.gCost+neighbor.hCost;
             }
         }
         //make current lowest fCost
         let arr = [...open]
-        arr.sort(compareFCost)
+        arr.sort(tieBreak)
         current = arr[0]
         if (open.size>0) {setTimeout(recursiveLoop, 50)};
     }

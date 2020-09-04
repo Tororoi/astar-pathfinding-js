@@ -40,14 +40,37 @@
     </div>
     <div class="settings">
         <div class="parameters">
-            <input type="checkbox" id="diagonals" name="diagonals" value="false">
-            <label for="diagonals"> Diagonals?</label><br>
             <p>Step Delay:</p> 
             <p class="delay">100</p>
-            <input type="range" min="10" max="5000" value="100" class="slider" id="stepDelay"><br>
+            <input type="range" min="10" max="3000" value="100" class="slider" id="stepDelay"><br>
             <p>Tile Size:</p> 
             <p class="tileSize">16</p>
-            <input type="range" min="3" max="6" value="3" class="slider" id="tileSlider">
+            <input type="range" min="3" max="6" value="4" class="slider" id="tileSlider">
+        </div>
+        <div class="cost-calc" id="heuristic">
+            <p>Heuristic Distance:</p>
+            <input type="radio" id="manhattan" name="heuristic" value="manhattan">
+            <label for="manhattan">Manhattan</label><br>
+            <input type="radio" id="octile" name="heuristic" value="octile" checked="checked">
+            <label for="octile">Octile</label><br>
+            <input type="radio" id="euclidean" name="heuristic" value="euclidean">
+            <label for="euclidean">Euclidean</label>
+        </div>
+        <div class="cost-calc" id="fCost">
+            <p>fCost Method:</p>
+            <input type="radio" id="sum" name="fCost" value="sum" checked="checked">
+            <label for="sum">g(n) + h(n)</label><br>
+            <input type="radio" id="ignoreG" name="fCost" value="ignoreG">
+            <label for="ignoreG">Ignore g(n)</label><br>
+        </div>
+        <div class="cost-calc" id="tieBreak">
+            <p>Tie Breaker:</p>
+            <input type="radio" id="cross" name="tiebreak" value="cross" checked="checked">
+            <label for="cross">Cross Product</label><br>
+            <input type="radio" id="proximity" name="tiebreak" value="proximity">
+            <label for="proximity">Proximity</label><br>
+            <input type="radio" id="noBreak" name="tiebreak" value="noBreak">
+            <label for="noBreak">None</label><br>
         </div>
     </div>
   </body>

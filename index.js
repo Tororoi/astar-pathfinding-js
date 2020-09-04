@@ -117,7 +117,58 @@ function selectColor(e) {
 }
 //-------------------------------Output-----------------------------------//
 let steps = document.querySelector('.steps');
+//------------------------------Settings----------------------------------//
+let delaySlider = document.querySelector('#stepDelay');
+let delayDisplay = document.querySelector('.delay');
 
+delaySlider.addEventListener('input', updateDelay);
+function updateDelay(e) {
+    delayDisplay.textContent = delaySlider.value;
+}
+
+let tileSlider = document.querySelector('#tileSlider');
+let tileSizeDisplay = document.querySelector('.tileSize');
+
+tileSlider.addEventListener('input', updateTiles);
+
+function updateTiles(e) {
+    tileSize = Math.pow(2, tileSlider.value);
+    offScreenCVS.width = onScreenCVS.width/tileSize;
+    offScreenCVS.height = onScreenCVS.height/tileSize;
+    tileSizeDisplay.textContent = tileSize;
+    onScreenCTX.clearRect(0,0,onScreenCVS.width,onScreenCVS.height)
+    offScreenCTX.clearRect(0,0,offScreenCVS.width,offScreenCVS.height)
+    generateMap();
+}
+//Heuristics
+let hButtons = document.querySelector('#heuristic');
+
+//fCost Calc Methods
+let fButtons = document.querySelector('#fCost');
+
+fButtons.addEventListener('input',updateFCalc);
+function updateFCalc(e) {
+    if (e.target.value === "ignoreG") {
+        calcFCost = ignoreG;
+    } else if (e.target.value === "sum") {
+        calcFCost = sumCost;
+    }
+}
+
+//Tie Breakers
+let tieButtons = document.querySelector('#tieBreak');
+
+tieButtons.addEventListener('input',updateTieBreak);
+
+function updateTieBreak(e) {
+    if (e.target.value === "cross") {
+        tieBreak = crossBreak;
+    } else if (e.target.value === "proximity") {
+        tieBreak = proximBreak;
+    } else if (e.target.value === "noBreak") {
+        tieBreak = noBreak;
+    }
+}
 //----------------------------Calc Functions------------------------------//
 //********* Calculate gCost ***********//
 let calcGCost = calcPath;
@@ -157,7 +208,7 @@ function euclid(node1, node2) {
     return Math.hypot(node1.x - node2.x,node1.y - node2.y);
 }
 //********* fCost Tie Breakers using hCost ***********//
-let tieBreak = noBreak;
+let tieBreak = crossBreak;
 //Tiebreak with cross product to favor paths closer to a straight line to the goal
 function crossBreak(node) {
     let dx1 = node.x - end.x;
@@ -204,10 +255,15 @@ function compareFCost(obj1,obj2) {
 }
 //--------------------------------Grid------------------------------------//
 let gameGrid = [];
+let start = {};
+let end = {};
 //walls list for drawing during pathfinding steps
 let walls = [];
 
 function generateMap(e) {
+  gameGrid = [];
+  start = {};
+  end = {};
   let imageData = offScreenCTX.getImageData(0,0,offScreenCVS.width,offScreenCVS.height);
   //Make the 2D array to hold all objects
   for (let i=0; i<offScreenCVS.height; i++) {
@@ -247,8 +303,6 @@ function generateMap(e) {
   }
 }
 //------------------------------Pathfinder-------------------------------//
-let start = {};
-let end = {};
 
 function findPath() {
     //Search
@@ -354,7 +408,7 @@ function findPath() {
             }
             //-------------------Draw Path-----------------------//
             let truePath = tempPath.reverse();
-            drawPath(truePath, 50);
+            drawPath(truePath, delaySlider.value);
             return truePath;
         }
         //Eight neighbors
@@ -446,7 +500,7 @@ function findPath() {
         let arr = [...open]
         arr.sort(compareFCost)
         current = arr[0]
-        if (open.size>0) {setTimeout(recursiveLoop, 50)};
+        if (open.size>0) {setTimeout(recursiveLoop, delaySlider.value)};
     }
     // }
 }

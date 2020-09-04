@@ -82,7 +82,12 @@
 
 /* Settings */
 
+.settings {
+    display: flex;
+}
+
 .parameters {
+    margin: 5px;
     display: flex;
     width: 128px;
     flex-flow: row wrap;
@@ -98,4 +103,13 @@
 
 #tileSlider {
     width: 100%;
+}
+
+.cost-calc {
+    margin: 5px;
+    width: 128px;
+}
+
+.cost-calc p {
+    margin: 2px;
 }

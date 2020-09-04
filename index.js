@@ -98,7 +98,7 @@ function renderImage() {
     img.src = source;
 }
 
-//-------------------------------ToolBox----------------------------------//
+//-------------------------------Palette----------------------------------//
 let palette = document.querySelector('.color-select');
 
 palette.addEventListener('click', selectColor)
@@ -115,6 +115,9 @@ function selectColor(e) {
     } 
   });
 }
+//-------------------------------Output-----------------------------------//
+let steps = document.querySelector('.steps');
+
 //----------------------------Calc Functions------------------------------//
 //********* Calculate gCost ***********//
 let calcGCost = calcPath;
@@ -153,8 +156,37 @@ function octile(node1, node2) {
 function euclid(node1, node2) {
     return Math.hypot(node1.x - node2.x,node1.y - node2.y);
 }
-//********* fCost Tie Breakers ***********//
-let tieBreak = compareFCost;
+//********* fCost Tie Breakers using hCost ***********//
+let tieBreak = noBreak;
+//Tiebreak with cross product to favor paths closer to a straight line to the goal
+function crossBreak(node) {
+    let dx1 = node.x - end.x;
+    let dy1 = node.y - end.y;
+    let dx2 = start.x - end.x;
+    let dy2 = start.y - end.y;
+    let cross = Math.abs(dx1*dy2 - dx2*dy1);
+    return cross*0.001;
+}
+//Prioritize closest to goal
+function proximBreak(node) {
+    //dwarf gCost
+    return calcHCost(node, end)*10;
+}
+//No Tie Break
+function noBreak(node) {
+    return 0;
+}
+//************* Calc fCost **************//
+let calcFCost = sumCost;
+//Simple sum
+function sumCost(g, h) {
+    return g + h;
+}
+//Ignore gCost
+function ignoreG(g, h) {
+    return h;
+}
+//************* Rank fCost **************//
 //Rank by fCost, then hCost if equal.
 function compareFCost(obj1,obj2) {
     if (obj1.fCost === obj2.fCost) {
@@ -168,6 +200,7 @@ function compareFCost(obj1,obj2) {
     } else if (obj1.fCost < obj2.fCost) {
         return -1;
     }
+    return 0;
 }
 //--------------------------------Grid------------------------------------//
 let gameGrid = [];
@@ -223,7 +256,7 @@ function findPath() {
     let open = new Set();
     open.add(start);
     start.gCost = 0;
-    start.hCost = calcHCost(start, end);
+    start.hCost = calcHCost(start, end)+tieBreak(start);
     start.fCost = start.gCost+start.hCost;
     //empty set
     let closed = new Set();
@@ -254,10 +287,12 @@ function findPath() {
         recursor();
     }
     let stepCount = 0;
+    steps.textContent = 0;
     // while (open.size>0&&stop<100) {
     recursiveLoop();
     function recursiveLoop() {
         stepCount += 1;
+        steps.textContent = stepCount;
         //-------------------------Draw Progress------------------------//
         onScreenCTX.clearRect(0,0,512,320)
         for (let i=0; i<offScreenCVS.height; i++) {
@@ -311,7 +346,6 @@ function findPath() {
         closed.add(current);
         //End case
         if (current === end) {
-            console.log("steps:", stepCount)
             let curr = current;
             let tempPath = [];
             while(curr.parent) {
@@ -400,23 +434,22 @@ function findPath() {
                 open.add(neighbor);
                 //Round the costs to take care of floating point errors.
                 neighbor.gCost = calcGCost(neighbor);
-                neighbor.hCost = calcHCost(neighbor, end);
-                neighbor.fCost = neighbor.gCost+neighbor.hCost;
+                neighbor.hCost = calcHCost(neighbor, end) + tieBreak(neighbor);
+                neighbor.fCost = calcFCost(neighbor.gCost, neighbor.hCost);
             } else if (open.has(neighbor)&&neighbor.gCost > current.gCost+tCost) {
                 if (neighbor!=start) {neighbor.parent = current;}
                 neighbor.gCost = calcGCost(neighbor);
-                neighbor.fCost = neighbor.gCost+neighbor.hCost;
+                neighbor.fCost = calcFCost(neighbor.gCost, neighbor.hCost);
             }
         }
         //make current lowest fCost
         let arr = [...open]
-        arr.sort(tieBreak)
+        arr.sort(compareFCost)
         current = arr[0]
         if (open.size>0) {setTimeout(recursiveLoop, 50)};
     }
     // }
 }
-
 //---------------------------Find Path-----------------------------//
 let generateBtn = document.querySelector(".generate-btn")
 

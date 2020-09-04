@@ -4,9 +4,10 @@
     display: flex;
 }
 
-.generator {
+.map {
     border: 1px solid black;
-    background-color: #830057;
+    background-color: #ffffff;
+    color: #830071
 }
 
 .color-select {
@@ -58,16 +59,43 @@
     background-color: black;
 }
 
+/* Output */
+
+.output {
+    display: flex;
+    height: 32px;
+}
+
+.output p {
+    align-self: center;
+}
+
+.steps {
+    margin-left: 4px;
+}
+
 .generate-btn {
     height: 24px;
     margin: 10px;
     align-self: center;
 }
 
-/* Game CSS */
+/* Settings */
 
-.map {
-    border: 1px solid black;
-    background-color: #ffffff;
-    color: #830071
-  }
+.parameters {
+    display: flex;
+    width: 128px;
+    flex-flow: row wrap;
+}
+
+.parameters p {
+    margin: 2px;
+}
+
+#stepDelay {
+    width: 100%;
+}
+
+#tileSlider {
+    width: 100%;
+}

@@ -33,6 +33,22 @@
             </div>
         </div>
     </div>
-    <button class="generate-btn">Find Path</button>
+    <div class="output">
+        <button class="generate-btn">Find Path</button>
+        <p>Steps: </p>
+        <p class="steps">0</p>
+    </div>
+    <div class="settings">
+        <div class="parameters">
+            <input type="checkbox" id="diagonals" name="diagonals" value="false">
+            <label for="diagonals"> Diagonals?</label><br>
+            <p>Step Delay:</p> 
+            <p class="delay">100</p>
+            <input type="range" min="10" max="5000" value="100" class="slider" id="stepDelay"><br>
+            <p>Tile Size:</p> 
+            <p class="tileSize">16</p>
+            <input type="range" min="3" max="6" value="3" class="slider" id="tileSlider">
+        </div>
+    </div>
   </body>
 </html>

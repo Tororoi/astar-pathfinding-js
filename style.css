@@ -68,9 +68,15 @@
 
 .output p {
     align-self: center;
+    margin-left: 4px;
+    margin-right: 4px;
 }
 
 .steps {
+    margin-left: 4px;
+}
+
+.path {
     margin-left: 4px;
 }
 
@@ -89,7 +95,7 @@
 .parameters {
     margin: 5px;
     display: flex;
-    width: 128px;
+    width: 160px;
     flex-flow: row wrap;
 }
 

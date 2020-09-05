@@ -117,6 +117,7 @@ function selectColor(e) {
 }
 //-------------------------------Output-----------------------------------//
 let steps = document.querySelector('.steps');
+let pathLength = document.querySelector('.path');
 //------------------------------Settings----------------------------------//
 let delaySlider = document.querySelector('#stepDelay');
 let delayDisplay = document.querySelector('.delay');
@@ -192,6 +193,7 @@ function calcPath(node) {
         cost += step;
         curr = curr.parent;   
     }
+    cost = Math.floor(cost*100)/100;
     return cost;
 }
 //********* Calculate hCost ***********//
@@ -216,7 +218,8 @@ function octile(node1, node2) {
 }
 //Euclidean Distance (with diagonal movement)
 function euclid(node1, node2) {
-    return Math.hypot(node1.x - node2.x,node1.y - node2.y);
+    let distance = Math.hypot(node1.x - node2.x,node1.y - node2.y);
+    return Math.floor(distance*100)/100
 }
 //********* fCost Tie Breakers using hCost ***********//
 let tieBreak = crossBreak;
@@ -232,7 +235,7 @@ function crossBreak(node) {
 //Prioritize closest to goal
 function proximBreak(node) {
     //dwarf gCost
-    return euclid(node, end)*0.001;
+    return euclid(node, end)*0.01;
 }
 //No Tie Break
 function noBreak(node) {
@@ -242,7 +245,7 @@ function noBreak(node) {
 let calcFCost = sumCost;
 //Simple sum
 function sumCost(g, h) {
-    return g + h;
+    return Math.floor((g + h)*100)/100;
 }
 //Ignore gCost
 function ignoreG(g, h) {
@@ -332,8 +335,16 @@ function findPath() {
         let pathIndex = 0;
         function recursor() {
             let tile = path[pathIndex]
-            onScreenCTX.fillStyle = "pink"
+            onScreenCTX.fillStyle = "rgb(204,204,255)"
             onScreenCTX.fillRect(tile.x*tileSize+1,tile.y*tileSize+1,tileSize-2,tileSize-2)
+            if (pathIndex === 0) {
+                onScreenCTX.fillStyle = "rgb(255,248,43)"
+                onScreenCTX.fillRect(tile.x*tileSize+1,tile.y*tileSize+1,tileSize-2,tileSize-2)
+            }
+            if (pathIndex === path.length-1) {
+                onScreenCTX.fillStyle = "rgb(97,92,255)"
+                onScreenCTX.fillRect(tile.x*tileSize+1,tile.y*tileSize+1,tileSize-2,tileSize-2)
+            }
             pathIndex+=1;
             if (pathIndex < path.length) {setTimeout(recursor, delay)}
         }
@@ -353,11 +364,13 @@ function findPath() {
     }
     let stepCount = 0;
     steps.textContent = 0;
+    pathLength.textContent = 0;
     // while (open.size>0&&stop<100) {
     recursiveLoop();
     function recursiveLoop() {
         stepCount += 1;
         steps.textContent = stepCount;
+        pathLength.textContent = current.gCost;
         //-------------------------Draw Progress------------------------//
         onScreenCTX.clearRect(0,0,512,320)
         for (let i=0; i<offScreenCVS.height; i++) {
@@ -372,20 +385,17 @@ function findPath() {
             onScreenCTX.fillRect(w.x*tileSize+1,w.y*tileSize+1,tileSize-2,tileSize-2);
         })
         open.forEach(n => {
-            onScreenCTX.fillStyle = "green";
+            onScreenCTX.fillStyle = "rgb(33,181,235)";
             onScreenCTX.fillRect(n.x*tileSize+1,n.y*tileSize+1,tileSize-2,tileSize-2);
             onScreenCTX.fillStyle = "black";
-            onScreenCTX.font = `${tileSize/2}px Arial`;
-            onScreenCTX.fillText(Math.round(n.fCost*10)/10, n.x*tileSize,n.y*tileSize+(tileSize/2));
+            onScreenCTX.font = `${tileSize/3}px Arial`;
+            onScreenCTX.fillText(n.fCost, n.x*tileSize,n.y*tileSize+(tileSize/2));
         });
         closed.forEach(n => {
-            onScreenCTX.fillStyle = "red";
+            onScreenCTX.fillStyle = `rgba(222,0,0,${n.hCost/n.fCost})`;
             onScreenCTX.fillRect(n.x*tileSize+1,n.y*tileSize+1,tileSize-2,tileSize-2);
-            if (open.has(n)) {
-                console.log("yellow")
-                onScreenCTX.fillStyle = "yellow";
-                onScreenCTX.fillRect(n.x*tileSize+1,n.y*tileSize+1,tileSize-2,tileSize-2);
-            }
+            onScreenCTX.fillStyle = `rgba(83,222,2,${n.gCost/n.fCost})`;
+            onScreenCTX.fillRect(n.x*tileSize+1,n.y*tileSize+1,tileSize-2,tileSize-2);
         })
         function progressPath() {
             let curr = current;
@@ -404,7 +414,7 @@ function findPath() {
         onScreenCTX.fillStyle = "purple";
         onScreenCTX.fillRect(current.x*tileSize+1,current.y*tileSize+1,tileSize-2,tileSize-2);
         onScreenCTX.fillStyle = "black";
-        onScreenCTX.fillText(Math.round(current.fCost*10)/10, current.x*tileSize,current.y*tileSize+(tileSize/2));
+        onScreenCTX.fillText(current.fCost, current.x*tileSize,current.y*tileSize+(tileSize/2));
         //------------------------Drawing Done----------------------------//
         //Remove lowest fCost from open and add it to closed
         open.delete(current);
@@ -417,6 +427,7 @@ function findPath() {
                 tempPath.push(curr);
                 curr = curr.parent;
             }
+            tempPath.push(curr);
             //-------------------Draw Path-----------------------//
             let truePath = tempPath.reverse();
             drawPath(truePath, delaySlider.value);
@@ -492,7 +503,7 @@ function findPath() {
                     continue;
                 }
             }
-            let tCost = Math.floor(euclid(neighbor,current)*100)/100;
+            let tCost = euclid(neighbor,current);
             //For new tiles
             if (!(open.has(neighbor)||closed.has(neighbor))) {
                 if (neighbor!=start) {neighbor.parent = current;}
@@ -518,10 +529,10 @@ function findPath() {
 //---------------------------Find Path-----------------------------//
 let generateBtn = document.querySelector(".generate-btn")
 
-generateBtn.addEventListener("click", drawPath);
+generateBtn.addEventListener("click", makePath);
 
 generateMap();
 
-function drawPath() {
+function makePath() {
     findPath();
 }

@@ -111,6 +111,10 @@
     width: 100%;
 }
 
+#precSlider {
+    width: 100%;
+}
+
 .cost-calc {
     margin: 5px;
     width: 128px;

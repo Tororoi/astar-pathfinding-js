@@ -118,7 +118,15 @@ function selectColor(e) {
 //-------------------------------Output-----------------------------------//
 let steps = document.querySelector('.steps');
 let pathLength = document.querySelector('.path');
+
+//Set rounding precision
+let decPlace = 1000;
+
 //------------------------------Settings----------------------------------//
+//Set Diagonals On/Off
+let diagonals = true;
+
+//Sliders
 let delaySlider = document.querySelector('#stepDelay');
 let delayDisplay = document.querySelector('.delay');
 
@@ -141,16 +149,31 @@ function updateTiles(e) {
     offScreenCTX.clearRect(0,0,offScreenCVS.width,offScreenCVS.height)
     generateMap();
 }
+
+let precSlider = document.querySelector('#precSlider');
+let precisionDisplay = document.querySelector('.precision');
+
+precSlider.addEventListener('input', updatePrecision);
+
+function updatePrecision(e) {
+    decPlace = Math.pow(10, precSlider.value);
+    precisionDisplay.textContent = decPlace;
+}
 //Heuristics
 let hButtons = document.querySelector('#heuristic');
 
 hButtons.addEventListener('input',updateHeuristic);
 
 function updateHeuristic(e) {
-    if (e.target.value === "octile") {
+    if (e.target.value === "manhattan") {
+        calcHCost = manhattan;
+        diagonals = false;
+    } else if (e.target.value === "octile") {
         calcHCost = octile;
+        diagonals = true;
     } else if (e.target.value === "euclidean") {
         calcHCost = euclid;
+        diagonals = true;
     }
 }
 
@@ -175,10 +198,16 @@ tieButtons.addEventListener('input',updateTieBreak);
 function updateTieBreak(e) {
     if (e.target.value === "cross") {
         tieBreak = crossBreak;
+        compareFCost = naiveRank;
     } else if (e.target.value === "proximity") {
         tieBreak = proximBreak;
+        compareFCost = naiveRank;
+    } else if (e.target.value === "hCost") {
+        tieBreak = noBreak;
+        compareFCost = deferToH;
     } else if (e.target.value === "noBreak") {
         tieBreak = noBreak;
+        compareFCost = naiveRank;
     }
 }
 //----------------------------Calc Functions------------------------------//
@@ -189,11 +218,11 @@ function calcPath(node) {
     let curr = node;
     let cost = 0;
     while(curr.parent) {
-        let step = Math.floor(euclid(curr,curr.parent)*100)/100;
+        let step = Math.floor(euclid(curr,curr.parent)*decPlace)/decPlace;
         cost += step;
         curr = curr.parent;   
     }
-    cost = Math.floor(cost*100)/100;
+    cost = Math.floor(cost*decPlace)/decPlace;
     return cost;
 }
 //********* Calculate hCost ***********//
@@ -212,14 +241,15 @@ function octile(node1, node2) {
     function leastSide() {
         if (a > b) {return b;} else {return a;}
     }
-    let diagonalCost = Math.floor(leastSide()*Math.sqrt(2)*100)/100;
+    let diagonalCost = leastSide()*Math.sqrt(2);
     let horizontalCost = Math.abs(b-a);
-    return diagonalCost+horizontalCost;
+    let sum = diagonalCost+horizontalCost;
+    return Math.floor(sum*decPlace)/decPlace;
 }
 //Euclidean Distance (with diagonal movement)
 function euclid(node1, node2) {
     let distance = Math.hypot(node1.x - node2.x,node1.y - node2.y);
-    return Math.floor(distance*100)/100
+    return Math.floor(distance*decPlace)/decPlace;
 }
 //********* fCost Tie Breakers using hCost ***********//
 let tieBreak = crossBreak;
@@ -230,12 +260,14 @@ function crossBreak(node) {
     let dx2 = start.x - end.x;
     let dy2 = start.y - end.y;
     let cross = Math.abs(dx1*dy2 - dx2*dy1);
-    return cross*0.001;
+    let breaker = cross*(1/decPlace)
+    return breaker;
 }
 //Prioritize closest to goal
 function proximBreak(node) {
     //dwarf gCost
-    return euclid(node, end)*0.01;
+    let breaker = euclid(node, end)*(1/decPlace);
+    return breaker;
 }
 //No Tie Break
 function noBreak(node) {
@@ -245,15 +277,16 @@ function noBreak(node) {
 let calcFCost = sumCost;
 //Simple sum
 function sumCost(g, h) {
-    return Math.floor((g + h)*100)/100;
+    return Math.floor((g + h)*decPlace)/decPlace;
 }
 //Ignore gCost
 function ignoreG(g, h) {
     return h;
 }
 //************* Rank fCost **************//
+let compareFCost = deferToH;
 //Rank by fCost, then hCost if equal.
-function compareFCost(obj1,obj2) {
+function deferToH(obj1,obj2) {
     if (obj1.fCost === obj2.fCost) {
         if (obj1.hCost > obj2.hCost) {
             return 1;
@@ -261,6 +294,15 @@ function compareFCost(obj1,obj2) {
             return -1;
         }
     } else if (obj1.fCost > obj2.fCost) {
+        return 1;
+    } else if (obj1.fCost < obj2.fCost) {
+        return -1;
+    }
+    return 0;
+}
+//Rank by fCost, naive
+function naiveRank(obj1,obj2) {
+    if (obj1.fCost > obj2.fCost) {
         return 1;
     } else if (obj1.fCost < obj2.fCost) {
         return -1;
@@ -324,8 +366,8 @@ function findPath() {
     let open = new Set();
     open.add(start);
     start.gCost = 0;
-    start.hCost = calcHCost(start, end)+tieBreak(start);
-    start.fCost = start.gCost+start.hCost;
+    start.hCost = Math.floor((calcHCost(start, end)+tieBreak(start))*decPlace)/decPlace;
+    start.fCost = calcFCost(start.gCost, start.hCost);
     //empty set
     let closed = new Set();
     let current = start;
@@ -450,30 +492,34 @@ function findPath() {
             //south
             south = gameGrid[current.y+1][current.x];
             neighbors.push(south);
-            if (gameGrid[current.y+1][current.x-1]) {
-                //southwest
-                southwest = gameGrid[current.y+1][current.x-1];
-                neighbors.push(southwest);
-            }
-            if (gameGrid[current.y+1][current.x+1]) {
-                //southeast
-                southeast = gameGrid[current.y+1][current.x+1];
-                neighbors.push(southeast);
+            if (diagonals) {
+                if (gameGrid[current.y+1][current.x-1]) {
+                    //southwest
+                    southwest = gameGrid[current.y+1][current.x-1];
+                    neighbors.push(southwest);
+                }
+                if (gameGrid[current.y+1][current.x+1]) {
+                    //southeast
+                    southeast = gameGrid[current.y+1][current.x+1];
+                    neighbors.push(southeast);
+                }
             }
         }
         if (gameGrid[current.y-1]) {
             //north
             north = gameGrid[current.y-1][current.x];
             neighbors.push(north);
-            if (gameGrid[current.y-1][current.x-1]) {
-                //northwest
-                northwest = gameGrid[current.y-1][current.x-1];
-                neighbors.push(northwest);
-            }
-            if (gameGrid[current.y-1][current.x+1]) {
-                //northeast
-                northeast = gameGrid[current.y-1][current.x+1];
-                neighbors.push(northeast);
+            if (diagonals) {
+                if (gameGrid[current.y-1][current.x-1]) {
+                    //northwest
+                    northwest = gameGrid[current.y-1][current.x-1];
+                    neighbors.push(northwest);
+                }
+                if (gameGrid[current.y-1][current.x+1]) {
+                    //northeast
+                    northeast = gameGrid[current.y-1][current.x+1];
+                    neighbors.push(northeast);
+                }
             }
         }
 
@@ -510,7 +556,7 @@ function findPath() {
                 open.add(neighbor);
                 //Round the costs to take care of floating point errors.
                 neighbor.gCost = calcGCost(neighbor);
-                neighbor.hCost = calcHCost(neighbor, end) + tieBreak(neighbor);
+                neighbor.hCost = Math.floor((calcHCost(neighbor, end) + tieBreak(neighbor))*decPlace)/decPlace;
                 neighbor.fCost = calcFCost(neighbor.gCost, neighbor.hCost);
             } else if (open.has(neighbor)&&neighbor.gCost > current.gCost+tCost) {
                 if (neighbor!=start) {neighbor.parent = current;}

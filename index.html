@@ -48,6 +48,9 @@
             <p>Tile Size (px):</p> 
             <p class="tileSize">16</p>
             <input type="range" min="3" max="6" value="4" class="slider" id="tileSlider">
+            <p>Precision:</p> 
+            <p class="precision">1000</p>
+            <input type="range" min="0" max="10" value="3" class="slider" id="precSlider">
         </div>
         <div class="cost-calc" id="heuristic">
             <p>Heuristic Distance:</p>
@@ -71,6 +74,8 @@
             <label for="cross">Cross Product</label><br>
             <input type="radio" id="proximity" name="tiebreak" value="proximity">
             <label for="proximity">Proximity</label><br>
+            <input type="radio" id="hCost" name="tiebreak" value="hCost">
+            <label for="hCost">h(n)</label><br>
             <input type="radio" id="noBreak" name="tiebreak" value="noBreak">
             <label for="noBreak">None</label><br>
         </div>

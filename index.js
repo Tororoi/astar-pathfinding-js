@@ -11,8 +11,8 @@ let offScreenCTX = offScreenCVS.getContext("2d");
 //Set Tile Size
 let tileSize = 16;
 //Set the dimensions of the drawing canvas
-offScreenCVS.width = 32;
-offScreenCVS.height = 20;
+offScreenCVS.width = 64;
+offScreenCVS.height = 40;
 
 //Create an Image with a default source of the existing onscreen canvas
 let img = new Image;
@@ -414,7 +414,7 @@ function findPath() {
         steps.textContent = stepCount;
         pathLength.textContent = current.gCost;
         //-------------------------Draw Progress------------------------//
-        onScreenCTX.clearRect(0,0,512,320)
+        onScreenCTX.clearRect(0,0,onScreenCVS.width,onScreenCVS.height);
         for (let i=0; i<offScreenCVS.height; i++) {
             for (let j=0; j<offScreenCVS.width; j++) {
               onScreenCTX.beginPath();

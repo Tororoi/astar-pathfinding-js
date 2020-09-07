@@ -123,6 +123,16 @@ let pathLength = document.querySelector('.path');
 let decPlace = 1000;
 
 //------------------------------Settings----------------------------------//
+//Wall Buffer. Tiles adjacent to walls will cost more
+let cornerBuffer = false;
+
+let cornerCheckbox = document.querySelector('#cornerBuffer');
+
+cornerCheckbox.addEventListener('input',updateCornerBuffer);
+function updateCornerBuffer(e) {
+    cornerBuffer = cornerCheckbox.checked;
+}
+
 //Set Diagonals On/Off
 let diagonals = true;
 
@@ -219,7 +229,7 @@ function calcPath(node) {
     let cost = 0;
     while(curr.parent) {
         let step = Math.floor(euclid(curr,curr.parent)*decPlace)/decPlace;
-        cost += step;
+        cost += step*curr.cost;
         curr = curr.parent;   
     }
     cost = Math.floor(cost*decPlace)/decPlace;
@@ -325,7 +335,7 @@ function generateMap(e) {
   for (let i=0; i<offScreenCVS.height; i++) {
       gameGrid[i] = [];
       for (let j=0; j<offScreenCVS.width; j++) {
-        gameGrid[i][j] = {parent: null, type: "free", x: j, y: i, gCost: 0, hCost: 0, fCost: 0}
+        gameGrid[i][j] = {parent: null, cost: 1, type: "free", x: j, y: i, gCost: 0, hCost: 0, fCost: 0}
         onScreenCTX.beginPath();
         onScreenCTX.rect(j*tileSize, i*tileSize, tileSize, tileSize);
         onScreenCTX.stroke();
@@ -475,6 +485,7 @@ function findPath() {
             drawPath(truePath, delaySlider.value);
             return truePath;
         }
+
         //Eight neighbors
         let neighbors = [];
         let east,west,south,north,northeast,northwest,southeast,southwest;
@@ -533,23 +544,56 @@ function findPath() {
                 if ((north.type === "wall")&&(east.type === "wall")) {
                     continue;
                 }
+                if (cornerBuffer) {
+                    if ((east.type === "wall")) {
+                        continue;
+                    }
+                    if ((north.type === "wall")) {
+                        continue;
+                    }
+                }
+                
             }
             if (neighbor === northwest) {
                 if ((north.type === "wall")&&(west.type === "wall")) {
                     continue;
+                }
+                if (cornerBuffer) {
+                    if ((west.type === "wall")) {
+                        continue;
+                    }
+                    if ((north.type === "wall")) {
+                        continue;
+                    }
                 }
             }
             if (neighbor === southeast) {
                 if ((south.type === "wall")&&(east.type === "wall")) {
                     continue;
                 }
+                if (cornerBuffer) {
+                    if ((east.type === "wall")) {
+                        continue;
+                    }
+                    if ((south.type === "wall")) {
+                        continue;
+                    }
+                }
             }
             if (neighbor === southwest) {
                 if ((south.type === "wall")&&(west.type === "wall")) {
                     continue;
                 }
+                if (cornerBuffer) {
+                    if ((west.type === "wall")) {
+                        continue;
+                    }
+                    if ((south.type === "wall")) {
+                        continue;
+                    }
+                }
             }
-            let tCost = euclid(neighbor,current);
+            let tCost = euclid(neighbor,current)*neighbor.cost;
             //For new tiles
             if (!(open.has(neighbor)||closed.has(neighbor))) {
                 if (neighbor!=start) {neighbor.parent = current;}

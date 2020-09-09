@@ -16,7 +16,7 @@ To make a map for the path to traverse, select a box in the palette to the right
 ### Sliders 
 - Step Delay Slider: Adjusts the amount of time between steps of the algorithm. Given in milliseconds.
 - Tile Size Slider: Adjusts the tile size in increments of powers of 2, from 8 to 64.
-- Precision: Adjusts to what decimal place numbers are rounded when performing calculations. Due to floating point inconsistencies, less precision may produce better results. A precision lower than the path length will produce extreme results when used with the Cross Product or Proximity tie breakers.
+- Precision: Adjusts to what decimal place numbers are rounded when performing calculations. Due to floating point inconsistencies, less precision may produce better results. A precision lower than the path length will produce extreme results when used with tie breakers.
 
 ### Heuristic Options
 These selections alter the way the estimated distance between any given tile and the end tile are calculated.

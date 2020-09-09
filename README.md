@@ -1,6 +1,7 @@
 # A* Pathfinding Visualizer
 
 Try it out [here](https://dreamy-cori-d15ae3.netlify.app/)!
+
 This is a visualizer for A* (pronounced a-star) pathfinding algorithms. There are various settings that can be adjusted to change how the algorithm calculates the path.
 
 ## Draw a map

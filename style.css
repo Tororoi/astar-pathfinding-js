@@ -1,13 +1,16 @@
 /* Generator CSS */
+body {
+    background: rgb(214, 206, 197);
+    font: 14px Arial;
+}
 
 .generator-container {
     display: flex;
 }
 
 .map {
-    border: 1px solid black;
-    background-color: #ffffff;
-    color: #830071
+    border: 1px solid rgb(214, 206, 197);
+    background-color: rgb(235, 234, 228);
 }
 
 .color-select {
@@ -64,6 +67,10 @@
 .output {
     display: flex;
     height: 32px;
+    -webkit-user-select: none;  /* Chrome all / Safari all */
+    -moz-user-select: none;     /* Firefox all */
+    -ms-user-select: none;      /* IE 10+ */
+    user-select: none; 
 }
 
 .output p {
@@ -81,15 +88,38 @@
 }
 
 .generate-btn {
+    -webkit-appearance: none;  /* Override default CSS styles */
+    appearance: none;
     height: 24px;
     margin: 10px;
+    font: 14px Arial;
+    background: rgb(235, 234, 228);
+    border: 1px solid black;
+    outline: none;
+    opacity: 0.7;
     align-self: center;
+}
+
+.generate-btn:hover {
+    opacity: 1;
+}
+
+.generate-btn:active {
+    background: #004ff8;
 }
 
 /* Settings */
 
 .settings {
     display: flex;
+    -webkit-user-select: none;  /* Chrome all / Safari all */
+    -moz-user-select: none;     /* Firefox all */
+    -ms-user-select: none;      /* IE 10+ */
+    user-select: none; 
+}
+
+.category {
+    text-decoration: underline;
 }
 
 .parameters {
@@ -103,16 +133,75 @@
     margin: 2px;
 }
 
-#stepDelay {
+.slider {
+    -webkit-appearance: none;  /* Override default CSS styles */
+    appearance: none;
     width: 100%;
+    height: 16px;
+    background: rgb(218, 216, 211);
+    outline: none;
+    border: 1px solid black;
+    -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+    transition: background-color .2s;
 }
 
-#tileSlider {
-    width: 100%;
+.slider:hover {
+    background: rgb(235, 234, 228);
 }
 
-#precSlider {
-    width: 100%;
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Override default look */
+    appearance: none;
+    width: 8px; /* Set a specific slider handle width */
+    height: 16px; /* Slider handle height */
+    background: #004ff8; /* Green background */
+  }
+  
+.slider::-moz-range-thumb {
+    width: 8px; /* Set a specific slider handle width */
+    height: 16px; /* Slider handle height */
+    background: #004ff8; /* Green background */
+}
+
+.checkbox {
+    -webkit-appearance: none; /* Override default look */
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: rgb(218, 216, 211);
+    border: 1px solid black;
+    outline: none;
+    -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+    transition: opacity .2s;
+}
+
+.checkbox:hover {
+    background: rgb(235, 234, 228);
+}
+
+.checkbox:checked {
+    background: #004ff8;
+}
+
+.radio {
+    -webkit-appearance: none; /* Override default look */
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: rgb(218, 216, 211);
+    border: 1px solid black;
+    outline: none;
+    -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+    transition: opacity .2s;
+}
+
+.radio:hover {
+    background: rgb(235, 234, 228);
+}
+
+.radio:checked {
+    background: #004ff8;
+    border: 1px solid black;
 }
 
 .cost-calc {

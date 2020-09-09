@@ -338,6 +338,7 @@ function generateMap(e) {
         gameGrid[i][j] = {parent: null, cost: 1, type: "free", x: j, y: i, gCost: 0, hCost: 0, fCost: 0}
         onScreenCTX.beginPath();
         onScreenCTX.rect(j*tileSize, i*tileSize, tileSize, tileSize);
+        onScreenCTX.strokeStyle = "rgb(214, 206, 197)";
         onScreenCTX.stroke();
       }
   }
@@ -417,7 +418,7 @@ function findPath() {
     let stepCount = 0;
     steps.textContent = 0;
     pathLength.textContent = 0;
-    // while (open.size>0&&stop<100) {
+
     recursiveLoop();
     function recursiveLoop() {
         stepCount += 1;

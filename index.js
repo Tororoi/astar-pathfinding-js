@@ -398,6 +398,10 @@ function findPath() {
                 onScreenCTX.fillStyle = "rgb(97,92,255)"
                 onScreenCTX.fillRect(tile.x*tileSize+1,tile.y*tileSize+1,tileSize-2,tileSize-2)
             }
+            if (path[pathIndex-1]) {
+                pathLen += Math.hypot(path[pathIndex].x - path[pathIndex-1].x,path[pathIndex].y - path[pathIndex-1].y);
+            }
+            pathLength.textContent = Math.floor(pathLen*100)/100;
             pathIndex+=1;
             if (pathIndex < path.length) {setTimeout(recursor, delay)}
         }
@@ -417,13 +421,14 @@ function findPath() {
     }
     let stepCount = 0;
     steps.textContent = 0;
+    let pathLen = 0;
     pathLength.textContent = 0;
 
     recursiveLoop();
     function recursiveLoop() {
         stepCount += 1;
         steps.textContent = stepCount;
-        pathLength.textContent = current.gCost;
+        // pathLength.textContent = current.gCost;
         //-------------------------Draw Progress------------------------//
         onScreenCTX.clearRect(0,0,onScreenCVS.width,onScreenCVS.height);
         for (let i=0; i<offScreenCVS.height; i++) {

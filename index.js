@@ -643,3 +643,12 @@ function clearGrid(e) {
     offScreenCTX.clearRect(0,0,offScreenCVS.width,offScreenCVS.height);
     generateMap();
 }
+
+//------------------------Maze Generator---------------------------//
+//Generate a random maze
+//Add options for path width, complexity
+
+//-------------------------Manual Path-----------------------------//
+//Manual: Enable drawing with a fourth color, but can only be drawn when connected to start
+//Auto: Enable drawing with a fifth color, but draws path from start to point dynamically
+//Neither color can draw over walls or end points.

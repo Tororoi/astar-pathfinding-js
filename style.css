@@ -87,6 +87,27 @@ body {
     margin-left: 4px;
 }
 
+.clear-btn {
+    -webkit-appearance: none;  /* Override default CSS styles */
+    appearance: none;
+    height: 24px;
+    margin: 10px;
+    font: 14px Arial;
+    background: rgb(235, 234, 228);
+    border: 1px solid black;
+    outline: none;
+    opacity: 0.7;
+    align-self: center;
+}
+
+.clear-btn:hover {
+    opacity: 1;
+}
+
+.clear-btn:active {
+    background: #004ff8;
+}
+
 .generate-btn {
     -webkit-appearance: none;  /* Override default CSS styles */
     appearance: none;

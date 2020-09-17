@@ -632,3 +632,14 @@ generateMap();
 function makePath() {
     findPath();
 }
+
+//--------------------------Clear Grid-----------------------------//
+let clearBtn = document.querySelector(".clear-btn")
+
+clearBtn.addEventListener("click", clearGrid);
+
+function clearGrid(e) {
+    onScreenCTX.clearRect(0,0,onScreenCVS.width,onScreenCVS.height);
+    offScreenCTX.clearRect(0,0,offScreenCVS.width,offScreenCVS.height);
+    generateMap();
+}

@@ -404,7 +404,7 @@ function findPath() {
             }
             pathLength.textContent = Math.floor(pathLen*100)/100;
             pathIndex+=1;
-            if (pathIndex < path.length) {setTimeout(recursor, delay)}
+            if (pathIndex < path.length) {setTimeout(recursor, 1)}
         }
         recursor();
     }

@@ -397,6 +397,7 @@ function findPath() {
             if (pathIndex === path.length-1) {
                 onScreenCTX.fillStyle = "rgb(97,92,255)"
                 onScreenCTX.fillRect(tile.x*tileSize+1,tile.y*tileSize+1,tileSize-2,tileSize-2)
+                generateBtn.disabled = false;
             }
             if (path[pathIndex-1]) {
                 pathLen += Math.hypot(path[pathIndex].x - path[pathIndex-1].x,path[pathIndex].y - path[pathIndex-1].y);
@@ -631,6 +632,7 @@ generateMap();
 
 function makePath() {
     findPath();
+    generateBtn.disabled = true;
 }
 
 //--------------------------Clear Grid-----------------------------//

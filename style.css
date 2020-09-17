@@ -176,7 +176,15 @@ body {
     width: 8px; /* Set a specific slider handle width */
     height: 16px; /* Slider handle height */
     background: #004ff8; /* Green background */
-  }
+}
+
+#tileSlider::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Override default look */
+    appearance: none;
+    width: 25%; /* Set a specific slider handle width */
+    height: 16px; /* Slider handle height */
+    background: #004ff8; /* Green background */
+}
   
 .slider::-moz-range-thumb {
     width: 8px; /* Set a specific slider handle width */

@@ -651,6 +651,11 @@ function clearGrid(e) {
     offScreenCTX.clearRect(0,0,offScreenCVS.width,offScreenCVS.height);
     generateMap();
 }
+//----------------------Adjust Tile Cost---------------------------//
+//Create options for drawing tiles that cost more than 1
+
+//-----------------------Node Efficiency---------------------------//
+//Create an option for mapping key nodes of map to reduce calculation time
 
 //------------------------Maze Generator---------------------------//
 //Generate a random maze

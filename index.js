@@ -118,6 +118,9 @@ function selectColor(e) {
 //-------------------------------Output-----------------------------------//
 let steps = document.querySelector('.steps');
 let pathLength = document.querySelector('.path');
+let gDisplay = document.querySelector('.gCost');
+let hDisplay = document.querySelector('.hCost');
+let fDisplay = document.querySelector('.fCost');
 
 //Set rounding precision
 let decPlace = 1000;
@@ -429,7 +432,10 @@ function findPath() {
     function recursiveLoop() {
         stepCount += 1;
         steps.textContent = stepCount;
-        // pathLength.textContent = current.gCost;
+
+        gDisplay.textContent = current.gCost;
+        hDisplay.textContent = current.hCost;
+        fDisplay.textContent = current.fCost;
         //-------------------------Draw Progress------------------------//
         onScreenCTX.clearRect(0,0,onScreenCVS.width,onScreenCVS.height);
         for (let i=0; i<offScreenCVS.height; i++) {

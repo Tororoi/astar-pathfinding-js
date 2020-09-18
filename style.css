@@ -79,12 +79,16 @@ body {
     margin-right: 4px;
 }
 
-.steps {
-    margin-left: 4px;
+.gCost {
+    color: rgb(143, 0, 0);
 }
 
-.path {
-    margin-left: 4px;
+.hCost {
+    color: rgb(40, 110, 0);
+}
+
+.fCost {
+    color: rgb(0, 86, 156);
 }
 
 .clear-btn {

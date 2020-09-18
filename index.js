@@ -36,6 +36,7 @@ function handleMouseMove(e) {
 
 function handleMouseDown(e) {
     clicked = true;
+    cancelPathfinding();
     draw(e);
     // generateMap();
 }
@@ -154,6 +155,7 @@ let tileSizeDisplay = document.querySelector('.tileSize');
 tileSlider.addEventListener('input', updateTiles);
 
 function updateTiles(e) {
+    cancelPathfinding();
     tileSize = Math.pow(2, tileSlider.value);
     offScreenCVS.width = onScreenCVS.width/tileSize;
     offScreenCVS.height = onScreenCVS.height/tileSize;
@@ -628,7 +630,7 @@ function findPath() {
         let arr = [...open]
         arr.sort(compareFCost)
         current = arr[0]
-        if (open.size>0) {setTimeout(recursiveLoop, delaySlider.value)};
+        if (open.size>0) {setTimeout(recursiveLoop, delaySlider.value)} else {cancelPathfinding()};
     }
     // }
 }

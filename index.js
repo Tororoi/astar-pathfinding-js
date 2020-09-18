@@ -339,9 +339,11 @@ function generateMap(e) {
       gameGrid[i] = [];
       for (let j=0; j<offScreenCVS.width; j++) {
         gameGrid[i][j] = {parent: null, cost: 1, type: "free", x: j, y: i, gCost: 0, hCost: 0, fCost: 0}
+        //Draw the grid lines
         onScreenCTX.beginPath();
         onScreenCTX.rect(j*tileSize, i*tileSize, tileSize, tileSize);
         onScreenCTX.strokeStyle = "rgb(214, 206, 197)";
+        onScreenCTX.lineWidth = 2;
         onScreenCTX.stroke();
       }
   }
@@ -430,6 +432,7 @@ function findPath() {
 
     recursiveLoop();
     function recursiveLoop() {
+        if (cancelPath) {return 0};
         stepCount += 1;
         steps.textContent = stepCount;
 
@@ -637,16 +640,27 @@ generateBtn.addEventListener("click", makePath);
 generateMap();
 
 function makePath() {
+    cancelPath = false;
     findPath();
     generateBtn.disabled = true;
 }
 
 //--------------------------Clear Grid-----------------------------//
 let clearBtn = document.querySelector(".clear-btn")
+let cancelBtn = document.querySelector(".cancel-btn")
+let cancelPath = false;
 
 clearBtn.addEventListener("click", clearGrid);
+cancelBtn.addEventListener("click",cancelPathfinding);
+
+function cancelPathfinding() {
+    cancelPath = true;
+    generateBtn.disabled = false;
+    // renderImage();
+}
 
 function clearGrid(e) {
+    cancelPathfinding();
     onScreenCTX.clearRect(0,0,onScreenCVS.width,onScreenCVS.height);
     offScreenCTX.clearRect(0,0,offScreenCVS.width,offScreenCVS.height);
     generateMap();

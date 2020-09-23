@@ -145,8 +145,8 @@ function updateCornerBuffer(e) {
     cornerBuffer = cornerCheckbox.checked;
 }
 
-nodeCheckbox.addEventListener('input',updateCornerBuffer);
-function updateCornerBuffer(e) {
+nodeCheckbox.addEventListener('input',updateNodeMap);
+function updateNodeMap(e) {
     mapNodes = nodeCheckbox.checked;
     renderImage();
 }
@@ -604,7 +604,7 @@ function findPath() {
             if (neighbor.type === "wall" || closed.has(neighbor)) {
                 continue;
             }
-            //Check corners
+            //Check corners -- FIX
             if (dir === "northeast") {
                 if ((currentNeighbors.north.type === "wall")&&(currentNeighbors.east.type === "wall")) {
                     continue;

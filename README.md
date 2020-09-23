@@ -13,6 +13,9 @@ To make a map for the path to traverse, select a box in the palette to the right
 ### Corner Buffer
 - If checked, this prevents diagonal movement around corners. Has no effect when used with Manhattan distance, since no diagonals are used with the Manhattan heuristic selected.
 
+### Map Nodes
+- If checked, not all free tiles will be marked as nodes. This means that any tile for which the path can only go in one direction will be automatically progressed in the algorithm.
+
 ### Sliders 
 - Step Delay Slider: Adjusts the amount of time between steps of the algorithm. Given in milliseconds.
 - Tile Size Slider: Adjusts the tile size in increments of powers of 2, from 8 to 64.

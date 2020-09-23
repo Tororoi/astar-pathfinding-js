@@ -659,6 +659,7 @@ function findPath() {
                 }
             }
             function checkFree(tile, prev) {
+                //Is this actually more efficient? Free tiles don't need their neighbors iterated over.
                 if (tile.type === "free") {
                     progressSearch(tile, prev);
                     let freeNeighbors = getNeighbors(tile);

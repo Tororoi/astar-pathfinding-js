@@ -373,6 +373,32 @@ function generateMap(e) {
         break;
       default: 
         //transparent pixel
+        //check neighbors
+        let freeNeighbors = 0;
+        function getColor(n) {
+            let clear = "rgba(0, 0, 0, 0)";
+            if (clear === `rgba(${imageData.data[n]}, ${imageData.data[n+1]}, ${imageData.data[n+2]}, ${imageData.data[n+3]})`) {
+                return true;
+                freeNeighbors += 1;
+            } else {
+                return false;
+            }
+        }
+        let n = getColor(i-offScreenCVS.width*4);
+        let s = getColor(i+offScreenCVS.width*4);
+        let e = getColor(i+4);
+        let w = getColor(i-4);
+        // let ne = getColor(i+4-offScreenCVS.width*4);
+        // let nw = getColor(i-4-offScreenCVS.width*4);
+        // let se = getColor(i+4+offScreenCVS.width*4);
+        // let sw = getColor(i-4+offScreenCVS.width*4);
+        if (freeNeighbors > 2) {
+            gameGrid[y][x].type = "node";
+        } else if ((n&&s)||(e&&w)) {
+            gameGrid[y][x].type = "free";
+        } else {
+            gameGrid[y][x].type = "node";
+        }
     }
   }
 }

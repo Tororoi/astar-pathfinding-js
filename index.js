@@ -96,7 +96,7 @@ function renderImage() {
       onScreenCTX.fillStyle = "black";
       generateMap();
       if (mapNodes) {
-        nodes.forEach(n => {
+        freeTiles.forEach(n => {
             onScreenCTX.fillStyle = "rgb(196, 188, 178)";
             onScreenCTX.fillRect(n.x*tileSize+1,n.y*tileSize+1,tileSize-2,tileSize-2);
         })
@@ -345,6 +345,7 @@ let end = {};
 //walls list for drawing during pathfinding steps
 let walls = [];
 let nodes = [];
+let freeTiles = [];
 
 function generateMap(e) {
   gameGrid = [];
@@ -367,6 +368,7 @@ function generateMap(e) {
   //Reset walls
   walls = [];
   nodes = [];
+  freeTiles = [];
   //Iterate through pixels and make objects each time a color matches
   for (let i=0; i<imageData.data.length; i+=4) {
     let x = i/4%offScreenCVS.width, y = (i/4-x)/offScreenCVS.width;
@@ -415,9 +417,11 @@ function generateMap(e) {
         } else if (n&&s) {
             gameGrid[y][x].type = "free";
             gameGrid[y][x].dir = "vertical";
+            freeTiles.push(gameGrid[y][x]);
         } else if (e&&w) {
             gameGrid[y][x].type = "free";
             gameGrid[y][x].dir = "horizontal";
+            freeTiles.push(gameGrid[y][x]);
         } else {
             gameGrid[y][x].type = "node";
             nodes.push(gameGrid[y][x]);
@@ -498,6 +502,12 @@ function findPath() {
               onScreenCTX.rect(j*tileSize, i*tileSize, tileSize, tileSize);
               onScreenCTX.stroke();
             }
+        }
+        if (mapNodes) {
+            freeTiles.forEach(n => {
+                onScreenCTX.fillStyle = "rgb(196, 188, 178)";
+                onScreenCTX.fillRect(n.x*tileSize+1,n.y*tileSize+1,tileSize-2,tileSize-2);
+            })
         }
         walls.forEach(w => {
             onScreenCTX.fillStyle = "black";

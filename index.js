@@ -678,7 +678,7 @@ function findPath() {
                         }
                     }
                 } else {
-                    neighbor = tile;
+                    progressSearch(tile, prev)
                 }
             }
             function progressSearch(tile, current) {
@@ -696,10 +696,14 @@ function findPath() {
                     tile.fCost = calcFCost(tile.gCost, tile.hCost);
                 }
             }
-            //extend past free tiles
-            if (mapNodes) {checkFree(neighbor, current)};
-            //For new tiles
-            progressSearch(neighbor, current);
+            
+            if (mapNodes) {
+                //extend past free tiles
+                checkFree(neighbor, current);
+            } else {
+                //For new tiles
+                progressSearch(neighbor, current);
+            }
         }
         //make current lowest fCost
         let arr = [...open]

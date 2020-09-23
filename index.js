@@ -95,6 +95,12 @@ function renderImage() {
       onScreenCTX.drawImage(img,0,0,onScreenCVS.width,onScreenCVS.height)
       onScreenCTX.fillStyle = "black";
       generateMap();
+      if (mapNodes) {
+        nodes.forEach(n => {
+            onScreenCTX.fillStyle = "rgb(196, 188, 178)";
+            onScreenCTX.fillRect(n.x*tileSize+1,n.y*tileSize+1,tileSize-2,tileSize-2);
+        })
+      }
     }
     img.src = source;
 }
@@ -129,12 +135,20 @@ let decPlace = 1000;
 //------------------------------Settings----------------------------------//
 //Wall Buffer. Tiles adjacent to walls will cost more
 let cornerBuffer = false;
+let mapNodes = false;
 
 let cornerCheckbox = document.querySelector('#cornerBuffer');
+let nodeCheckbox = document.querySelector('#nodeRedundancy');
 
 cornerCheckbox.addEventListener('input',updateCornerBuffer);
 function updateCornerBuffer(e) {
     cornerBuffer = cornerCheckbox.checked;
+}
+
+nodeCheckbox.addEventListener('input',updateCornerBuffer);
+function updateCornerBuffer(e) {
+    mapNodes = nodeCheckbox.checked;
+    renderImage();
 }
 
 //Set Diagonals On/Off
@@ -330,6 +344,7 @@ let start = {};
 let end = {};
 //walls list for drawing during pathfinding steps
 let walls = [];
+let nodes = [];
 
 function generateMap(e) {
   gameGrid = [];
@@ -351,6 +366,7 @@ function generateMap(e) {
   }
   //Reset walls
   walls = [];
+  nodes = [];
   //Iterate through pixels and make objects each time a color matches
   for (let i=0; i<imageData.data.length; i+=4) {
     let x = i/4%offScreenCVS.width, y = (i/4-x)/offScreenCVS.width;
@@ -378,26 +394,33 @@ function generateMap(e) {
         function getColor(n) {
             let clear = "rgba(0, 0, 0, 0)";
             if (clear === `rgba(${imageData.data[n]}, ${imageData.data[n+1]}, ${imageData.data[n+2]}, ${imageData.data[n+3]})`) {
-                return true;
                 freeNeighbors += 1;
+                return true;
             } else {
                 return false;
             }
         }
+        //add conditional for left and right canvas borders
         let n = getColor(i-offScreenCVS.width*4);
         let s = getColor(i+offScreenCVS.width*4);
         let e = getColor(i+4);
         let w = getColor(i-4);
-        // let ne = getColor(i+4-offScreenCVS.width*4);
-        // let nw = getColor(i-4-offScreenCVS.width*4);
-        // let se = getColor(i+4+offScreenCVS.width*4);
-        // let sw = getColor(i-4+offScreenCVS.width*4);
+        let ne = getColor(i+4-offScreenCVS.width*4);
+        let nw = getColor(i-4-offScreenCVS.width*4);
+        let se = getColor(i+4+offScreenCVS.width*4);
+        let sw = getColor(i-4+offScreenCVS.width*4);
         if (freeNeighbors > 2) {
             gameGrid[y][x].type = "node";
-        } else if ((n&&s)||(e&&w)) {
+            nodes.push(gameGrid[y][x]);
+        } else if (n&&s) {
             gameGrid[y][x].type = "free";
+            gameGrid[y][x].dir = "vertical";
+        } else if (e&&w) {
+            gameGrid[y][x].type = "free";
+            gameGrid[y][x].dir = "horizontal";
         } else {
             gameGrid[y][x].type = "node";
+            nodes.push(gameGrid[y][x]);
         }
     }
   }
@@ -531,126 +554,152 @@ function findPath() {
         }
 
         //Eight neighbors
-        let neighbors = [];
-        let east,west,south,north,northeast,northwest,southeast,southwest;
-        if (gameGrid[current.y][current.x+1]) {
-            //east
-            east = gameGrid[current.y][current.x+1];
-            neighbors.push(east);
-        }
-        if (gameGrid[current.y][current.x-1]) {
-            //west
-            west = gameGrid[current.y][current.x-1];
-            neighbors.push(west);
-        }
-        if (gameGrid[current.y+1]) {
-            //south
-            south = gameGrid[current.y+1][current.x];
-            neighbors.push(south);
-            if (diagonals) {
-                if (gameGrid[current.y+1][current.x-1]) {
-                    //southwest
-                    southwest = gameGrid[current.y+1][current.x-1];
-                    neighbors.push(southwest);
-                }
-                if (gameGrid[current.y+1][current.x+1]) {
-                    //southeast
-                    southeast = gameGrid[current.y+1][current.x+1];
-                    neighbors.push(southeast);
+        // let neighbors = [];
+        // let east,west,south,north,northeast,northwest,southeast,southwest;
+        function getNeighbors(tile) {
+            let neighbors = {};
+            if (gameGrid[tile.y][tile.x+1]) {
+                //east
+                neighbors.east = gameGrid[tile.y][tile.x+1];
+            }
+            if (gameGrid[tile.y][tile.x-1]) {
+                //west
+                neighbors.west = gameGrid[tile.y][tile.x-1];
+            }
+            if (gameGrid[tile.y+1]) {
+                //south
+                neighbors.south = gameGrid[tile.y+1][tile.x];
+                if (diagonals) {
+                    if (gameGrid[tile.y+1][tile.x-1]) {
+                        //southwest
+                        neighbors.southwest = gameGrid[tile.y+1][tile.x-1];
+                    }
+                    if (gameGrid[tile.y+1][tile.x+1]) {
+                        //southeast
+                        neighbors.southeast = gameGrid[tile.y+1][tile.x+1];
+                    }
                 }
             }
-        }
-        if (gameGrid[current.y-1]) {
-            //north
-            north = gameGrid[current.y-1][current.x];
-            neighbors.push(north);
-            if (diagonals) {
-                if (gameGrid[current.y-1][current.x-1]) {
-                    //northwest
-                    northwest = gameGrid[current.y-1][current.x-1];
-                    neighbors.push(northwest);
-                }
-                if (gameGrid[current.y-1][current.x+1]) {
-                    //northeast
-                    northeast = gameGrid[current.y-1][current.x+1];
-                    neighbors.push(northeast);
+            if (gameGrid[tile.y-1]) {
+                //north
+                neighbors.north = gameGrid[tile.y-1][tile.x];
+                if (diagonals) {
+                    if (gameGrid[tile.y-1][tile.x-1]) {
+                        //northwest
+                        neighbors.northwest = gameGrid[tile.y-1][tile.x-1];
+                    }
+                    if (gameGrid[tile.y-1][tile.x+1]) {
+                        //northeast
+                        neighbors.northeast = gameGrid[tile.y-1][tile.x+1];
+                    }
                 }
             }
+            return neighbors;
         }
-
-        for (let i=0; i<neighbors.length; i++) {
-            let neighbor = neighbors[i];
+        let currentNeighbors = getNeighbors(current);
+        let neighbArray = Object.entries(currentNeighbors);
+        for (let i=0; i<neighbArray.length; i++) {
+            let neighbor = neighbArray[i][1];
+            let dir = neighbArray[i][0];
             if (neighbor.type === "wall" || closed.has(neighbor)) {
                 continue;
             }
             //Check corners
-            if (neighbor === northeast) {
-                if ((north.type === "wall")&&(east.type === "wall")) {
+            if (dir === "northeast") {
+                if ((currentNeighbors.north.type === "wall")&&(currentNeighbors.east.type === "wall")) {
                     continue;
                 }
                 if (cornerBuffer) {
-                    if ((east.type === "wall")) {
+                    if ((currentNeighbors.east.type === "wall")) {
                         continue;
                     }
-                    if ((north.type === "wall")) {
+                    if ((currentNeighbors.north.type === "wall")) {
                         continue;
                     }
                 }
                 
             }
-            if (neighbor === northwest) {
-                if ((north.type === "wall")&&(west.type === "wall")) {
+            if (dir === "northwest") {
+                if ((currentNeighbors.north.type === "wall")&&(currentNeighbors.west.type === "wall")) {
                     continue;
                 }
                 if (cornerBuffer) {
-                    if ((west.type === "wall")) {
+                    if ((currentNeighbors.west.type === "wall")) {
                         continue;
                     }
-                    if ((north.type === "wall")) {
+                    if ((currentNeighbors.north.type === "wall")) {
                         continue;
                     }
                 }
             }
-            if (neighbor === southeast) {
-                if ((south.type === "wall")&&(east.type === "wall")) {
+            if (dir === "southeast") {
+                if ((currentNeighbors.south.type === "wall")&&(currentNeighbors.east.type === "wall")) {
                     continue;
                 }
                 if (cornerBuffer) {
-                    if ((east.type === "wall")) {
+                    if ((currentNeighbors.east.type === "wall")) {
                         continue;
                     }
-                    if ((south.type === "wall")) {
+                    if ((currentNeighbors.south.type === "wall")) {
                         continue;
                     }
                 }
             }
-            if (neighbor === southwest) {
-                if ((south.type === "wall")&&(west.type === "wall")) {
+            if (dir === "southwest") {
+                if ((currentNeighbors.south.type === "wall")&&(currentNeighbors.west.type === "wall")) {
                     continue;
                 }
                 if (cornerBuffer) {
-                    if ((west.type === "wall")) {
+                    if ((currentNeighbors.west.type === "wall")) {
                         continue;
                     }
-                    if ((south.type === "wall")) {
+                    if ((currentNeighbors.south.type === "wall")) {
                         continue;
                     }
                 }
             }
-            let tCost = euclid(neighbor,current)*neighbor.cost;
+            function checkFree(tile, prev) {
+                if (tile.type === "free") {
+                    progressSearch(tile, prev);
+                    let freeNeighbors = getNeighbors(tile);
+                    open.delete(tile);
+                    closed.add(tile);
+                    if (tile.dir === "horizontal") {
+                        if (freeNeighbors.east === prev) {
+                            checkFree(freeNeighbors.west, tile);
+                        } else if (freeNeighbors.west === prev) {
+                            checkFree(freeNeighbors.east, tile);
+                        }
+                    } else if (tile.dir === "vertical") {
+                        if (freeNeighbors.north === prev) {
+                            checkFree(freeNeighbors.south, tile);
+                        } else if (freeNeighbors.south === prev) {
+                            checkFree(freeNeighbors.north, tile);
+                        }
+                    }
+                } else {
+                    neighbor = tile;
+                }
+            }
+            function progressSearch(tile, current) {
+                let tCost = euclid(tile,current)*tile.cost;
+                if (!(open.has(tile)||closed.has(tile))) {
+                    if (tile!=start) {tile.parent = current;}
+                    open.add(tile);
+                    //Round the costs to take care of floating point errors.
+                    tile.gCost = calcGCost(tile);
+                    tile.hCost = Math.floor((calcHCost(tile, end) + tieBreak(tile))*decPlace)/decPlace;
+                    tile.fCost = calcFCost(tile.gCost, tile.hCost);
+                } else if (open.has(tile)&&tile.gCost > current.gCost+tCost) {
+                    if (tile!=start) {tile.parent = current;}
+                    tile.gCost = calcGCost(tile);
+                    tile.fCost = calcFCost(tile.gCost, tile.hCost);
+                }
+            }
+            //extend past free tiles
+            if (mapNodes) {checkFree(neighbor, current)};
             //For new tiles
-            if (!(open.has(neighbor)||closed.has(neighbor))) {
-                if (neighbor!=start) {neighbor.parent = current;}
-                open.add(neighbor);
-                //Round the costs to take care of floating point errors.
-                neighbor.gCost = calcGCost(neighbor);
-                neighbor.hCost = Math.floor((calcHCost(neighbor, end) + tieBreak(neighbor))*decPlace)/decPlace;
-                neighbor.fCost = calcFCost(neighbor.gCost, neighbor.hCost);
-            } else if (open.has(neighbor)&&neighbor.gCost > current.gCost+tCost) {
-                if (neighbor!=start) {neighbor.parent = current;}
-                neighbor.gCost = calcGCost(neighbor);
-                neighbor.fCost = calcFCost(neighbor.gCost, neighbor.hCost);
-            }
+            progressSearch(neighbor, current);
         }
         //make current lowest fCost
         let arr = [...open]

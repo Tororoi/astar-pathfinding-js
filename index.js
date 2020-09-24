@@ -442,8 +442,15 @@ function generateMap(e) {
         //transparent pixel
         //check neighbors
         let freeNeighbors = 0;
-        function getColor(n) {
-            // let clear = "rgba(0, 0, 0, 0)";
+        function getColor(n, dir) {
+            // console.log(i, dir, n%offScreenCVS.width*4, `rgba(${imageData.data[n]}, ${imageData.data[n+1]}, ${imageData.data[n+2]}, ${imageData.data[n+3]})`)
+            //check left right edges
+            if (dir === "east" && n%(offScreenCVS.width*4) === 0) {return false}
+            if (dir === "west" && (n+4)%(offScreenCVS.width*4) === 0) {return false}
+            //bottom edge
+            if (n > imageData.data.length) {return false};
+            //top edge
+            if (n < 0) {return false};
             //if it's not a wall, increment free neighbors
             let black = "rgba(0, 0, 0, 255)";
             let color = `rgba(${imageData.data[n]}, ${imageData.data[n+1]}, ${imageData.data[n+2]}, ${imageData.data[n+3]})`
@@ -454,15 +461,15 @@ function generateMap(e) {
                 return false;
             }
         }
-        //add conditional for left and right canvas borders
-        let n = getColor(i-offScreenCVS.width*4);
-        let s = getColor(i+offScreenCVS.width*4);
-        let e = getColor(i+4);
-        let w = getColor(i-4);
-        let ne = getColor(i+4-offScreenCVS.width*4);
-        let nw = getColor(i-4-offScreenCVS.width*4);
-        let se = getColor(i+4+offScreenCVS.width*4);
-        let sw = getColor(i-4+offScreenCVS.width*4);
+        let n = getColor(i-offScreenCVS.width*4, "north");
+        let s = getColor(i+offScreenCVS.width*4, "south");
+        let e = getColor(i+4, "east");
+        let w = getColor(i-4, "west");
+        let ne = getColor(i+4-offScreenCVS.width*4, "east");
+        let nw = getColor(i-4-offScreenCVS.width*4, "west");
+        let se = getColor(i+4+offScreenCVS.width*4, "east");
+        let sw = getColor(i-4+offScreenCVS.width*4, "west");
+        // console.log(freeNeighbors)
         if (freeNeighbors > 2) {
             gameGrid[y][x].type = "node";
             nodes.push(gameGrid[y][x]);

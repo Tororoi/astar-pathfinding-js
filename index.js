@@ -347,6 +347,47 @@ let walls = [];
 let nodes = [];
 let freeTiles = [];
 
+function getNeighbors(tile) {
+    let neighbors = {};
+    if (gameGrid[tile.y][tile.x+1]) {
+        //east
+        neighbors.east = gameGrid[tile.y][tile.x+1];
+    }
+    if (gameGrid[tile.y][tile.x-1]) {
+        //west
+        neighbors.west = gameGrid[tile.y][tile.x-1];
+    }
+    if (gameGrid[tile.y+1]) {
+        //south
+        neighbors.south = gameGrid[tile.y+1][tile.x];
+        if (diagonals) {
+            if (gameGrid[tile.y+1][tile.x-1]) {
+                //southwest
+                neighbors.southwest = gameGrid[tile.y+1][tile.x-1];
+            }
+            if (gameGrid[tile.y+1][tile.x+1]) {
+                //southeast
+                neighbors.southeast = gameGrid[tile.y+1][tile.x+1];
+            }
+        }
+    }
+    if (gameGrid[tile.y-1]) {
+        //north
+        neighbors.north = gameGrid[tile.y-1][tile.x];
+        if (diagonals) {
+            if (gameGrid[tile.y-1][tile.x-1]) {
+                //northwest
+                neighbors.northwest = gameGrid[tile.y-1][tile.x-1];
+            }
+            if (gameGrid[tile.y-1][tile.x+1]) {
+                //northeast
+                neighbors.northeast = gameGrid[tile.y-1][tile.x+1];
+            }
+        }
+    }
+    return neighbors;
+}
+
 function generateMap(e) {
   gameGrid = [];
   start = {};
@@ -369,9 +410,10 @@ function generateMap(e) {
   walls = [];
   nodes = [];
   freeTiles = [];
-  //Iterate through pixels and make objects each time a color matches
+  //Iterate through pixels and set objects type each time a color matches
   for (let i=0; i<imageData.data.length; i+=4) {
     let x = i/4%offScreenCVS.width, y = (i/4-x)/offScreenCVS.width;
+    gameGrid[y][x].neighbors = getNeighbors(gameGrid[y][x]);
     let color = `rgba(${imageData.data[i]}, ${imageData.data[i+1]}, ${imageData.data[i+2]}, ${imageData.data[i+3]})`
     switch(color) {
       case "rgba(0, 0, 0, 255)":
@@ -563,51 +605,7 @@ function findPath() {
             return truePath;
         }
 
-        //Eight neighbors
-        // let neighbors = [];
-        // let east,west,south,north,northeast,northwest,southeast,southwest;
-        function getNeighbors(tile) {
-            let neighbors = {};
-            if (gameGrid[tile.y][tile.x+1]) {
-                //east
-                neighbors.east = gameGrid[tile.y][tile.x+1];
-            }
-            if (gameGrid[tile.y][tile.x-1]) {
-                //west
-                neighbors.west = gameGrid[tile.y][tile.x-1];
-            }
-            if (gameGrid[tile.y+1]) {
-                //south
-                neighbors.south = gameGrid[tile.y+1][tile.x];
-                if (diagonals) {
-                    if (gameGrid[tile.y+1][tile.x-1]) {
-                        //southwest
-                        neighbors.southwest = gameGrid[tile.y+1][tile.x-1];
-                    }
-                    if (gameGrid[tile.y+1][tile.x+1]) {
-                        //southeast
-                        neighbors.southeast = gameGrid[tile.y+1][tile.x+1];
-                    }
-                }
-            }
-            if (gameGrid[tile.y-1]) {
-                //north
-                neighbors.north = gameGrid[tile.y-1][tile.x];
-                if (diagonals) {
-                    if (gameGrid[tile.y-1][tile.x-1]) {
-                        //northwest
-                        neighbors.northwest = gameGrid[tile.y-1][tile.x-1];
-                    }
-                    if (gameGrid[tile.y-1][tile.x+1]) {
-                        //northeast
-                        neighbors.northeast = gameGrid[tile.y-1][tile.x+1];
-                    }
-                }
-            }
-            return neighbors;
-        }
-        let currentNeighbors = getNeighbors(current);
-        let neighbArray = Object.entries(currentNeighbors);
+        let neighbArray = Object.entries(current.neighbors);
         for (let i=0; i<neighbArray.length; i++) {
             let neighbor = neighbArray[i][1];
             let dir = neighbArray[i][0];
@@ -616,54 +614,54 @@ function findPath() {
             }
             //Check corners -- FIX
             if (dir === "northeast") {
-                if ((currentNeighbors.north.type === "wall")&&(currentNeighbors.east.type === "wall")) {
+                if ((current.neighbors.north.type === "wall")&&(current.neighbors.east.type === "wall")) {
                     continue;
                 }
                 if (cornerBuffer) {
-                    if ((currentNeighbors.east.type === "wall")) {
+                    if ((current.neighbors.east.type === "wall")) {
                         continue;
                     }
-                    if ((currentNeighbors.north.type === "wall")) {
+                    if ((current.neighbors.north.type === "wall")) {
                         continue;
                     }
                 }
                 
             }
             if (dir === "northwest") {
-                if ((currentNeighbors.north.type === "wall")&&(currentNeighbors.west.type === "wall")) {
+                if ((current.neighbors.north.type === "wall")&&(current.neighbors.west.type === "wall")) {
                     continue;
                 }
                 if (cornerBuffer) {
-                    if ((currentNeighbors.west.type === "wall")) {
+                    if ((current.neighbors.west.type === "wall")) {
                         continue;
                     }
-                    if ((currentNeighbors.north.type === "wall")) {
+                    if ((current.neighbors.north.type === "wall")) {
                         continue;
                     }
                 }
             }
             if (dir === "southeast") {
-                if ((currentNeighbors.south.type === "wall")&&(currentNeighbors.east.type === "wall")) {
+                if ((current.neighbors.south.type === "wall")&&(current.neighbors.east.type === "wall")) {
                     continue;
                 }
                 if (cornerBuffer) {
-                    if ((currentNeighbors.east.type === "wall")) {
+                    if ((current.neighbors.east.type === "wall")) {
                         continue;
                     }
-                    if ((currentNeighbors.south.type === "wall")) {
+                    if ((current.neighbors.south.type === "wall")) {
                         continue;
                     }
                 }
             }
             if (dir === "southwest") {
-                if ((currentNeighbors.south.type === "wall")&&(currentNeighbors.west.type === "wall")) {
+                if ((current.neighbors.south.type === "wall")&&(current.neighbors.west.type === "wall")) {
                     continue;
                 }
                 if (cornerBuffer) {
-                    if ((currentNeighbors.west.type === "wall")) {
+                    if ((current.neighbors.west.type === "wall")) {
                         continue;
                     }
-                    if ((currentNeighbors.south.type === "wall")) {
+                    if ((current.neighbors.south.type === "wall")) {
                         continue;
                     }
                 }
@@ -672,20 +670,19 @@ function findPath() {
                 //Is this actually more efficient? Free tiles don't need their neighbors iterated over.
                 if (tile.type === "free") {
                     progressSearch(tile, prev);
-                    let freeNeighbors = getNeighbors(tile);
                     open.delete(tile);
                     closed.add(tile);
                     if (tile.dir === "horizontal") {
-                        if (freeNeighbors.east === prev) {
-                            checkFree(freeNeighbors.west, tile);
-                        } else if (freeNeighbors.west === prev) {
-                            checkFree(freeNeighbors.east, tile);
+                        if (tile.neighbors.east === prev) {
+                            checkFree(tile.neighbors.west, tile);
+                        } else if (tile.neighbors.west === prev) {
+                            checkFree(tile.neighbors.east, tile);
                         }
                     } else if (tile.dir === "vertical") {
-                        if (freeNeighbors.north === prev) {
-                            checkFree(freeNeighbors.south, tile);
-                        } else if (freeNeighbors.south === prev) {
-                            checkFree(freeNeighbors.north, tile);
+                        if (tile.neighbors.north === prev) {
+                            checkFree(tile.neighbors.south, tile);
+                        } else if (tile.neighbors.south === prev) {
+                            checkFree(tile.neighbors.north, tile);
                         }
                     }
                 } else {
@@ -766,6 +763,9 @@ function clearGrid(e) {
 //------------------------Maze Generator---------------------------//
 //Generate a random maze
 //Add options for path width, complexity
+//Algorithms:
+//Recursive backtracker
+// Eller's algorithm
 
 //-------------------------Manual Path-----------------------------//
 //Manual: Enable drawing with a fourth color, but can only be drawn when connected to start

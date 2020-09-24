@@ -8,6 +8,10 @@ This is a visualizer for A* (pronounced a-star) pathfinding algorithms. There ar
 
 To make a map for the path to traverse, select a box in the palette to the right of the grid, then draw that color on the grid. You can draw as many walls as you want, but you may only draw one start point and one end point. Use the eraser to clear tiles.
 
+### Generate Naive Maze
+
+Generates a map automatically, just for walls. Not guaranteed to be solvable and will likely have multiple paths from start to end. Can still be drawn on for custom changes.
+
 ## Settings
 
 ### Corner Buffer

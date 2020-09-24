@@ -774,7 +774,6 @@ function clearGrid(e) {
 //naive algorithm, not guaranteed solvable, O(n)
 function generateNaiveMaze(e) {
     cancelPathfinding();
-    onScreenCTX.clearRect(0,0,onScreenCVS.width/scale,onScreenCVS.height/scale);
     offScreenCTX.clearRect(0,0,offScreenCVS.width,offScreenCVS.height);
     let imageData = offScreenCTX.getImageData(0,0,offScreenCVS.width,offScreenCVS.height);
     for (let y = 0; y < imageData.height; y++) {
@@ -794,7 +793,6 @@ function generateNaiveMaze(e) {
     }
     source = offScreenCVS.toDataURL();
     renderImage();
-    generateMap();
 }
 //------------------------Maze Generator---------------------------//
 let generateMaze = generateNaiveMaze;

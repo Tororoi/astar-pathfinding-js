@@ -2,6 +2,13 @@
 //Set onscreen canvas and its context
 let onScreenCVS = document.querySelector(".map");
 let onScreenCTX = onScreenCVS.getContext("2d");
+onScreenCVS.width = 2048;
+onScreenCVS.height = 1280;
+onScreenCVS.style.width = "1024px";
+onScreenCVS.style.height = "640px";
+let scale = 2;
+onScreenCTX.scale(scale, scale);
+
 
 //Create an offscreen canvas. This is where we will actually be drawing, 
 //in order to keep the image consistent and free of distortions.
@@ -51,7 +58,7 @@ function handleMouseUp() {
 //size of the on and offscreen canvases to calculate where to draw on the 
 //offscreen canvas based on the coordinates of clicking on the onscreen canvas.
 function draw(e) {
-    let ratio = onScreenCVS.width/offScreenCVS.width;
+    let ratio = onScreenCVS.width/scale/offScreenCVS.width;
     if (offScreenCTX.fillStyle === "rgba(0, 0, 0, 0)") {
         offScreenCTX.clearRect(Math.floor(e.offsetX/ratio),Math.floor(e.offsetY/ratio),1,1);
     } else if (offScreenCTX.fillStyle === "#ffa500") {
@@ -91,8 +98,8 @@ function renderImage() {
     img.onload = () => {
       //Prevent blurring
       onScreenCTX.imageSmoothingEnabled = false;
-      onScreenCTX.clearRect(0,0,onScreenCVS.width,onScreenCVS.height);
-      onScreenCTX.drawImage(img,0,0,onScreenCVS.width,onScreenCVS.height)
+      onScreenCTX.clearRect(0,0,onScreenCVS.width/scale,onScreenCVS.height/scale);
+      onScreenCTX.drawImage(img,0,0,onScreenCVS.width/scale,onScreenCVS.height/scale)
       onScreenCTX.fillStyle = "black";
       generateMap();
       if (mapNodes) {
@@ -171,10 +178,10 @@ tileSlider.addEventListener('input', updateTiles);
 function updateTiles(e) {
     cancelPathfinding();
     tileSize = Math.pow(2, tileSlider.value);
-    offScreenCVS.width = onScreenCVS.width/tileSize;
-    offScreenCVS.height = onScreenCVS.height/tileSize;
+    offScreenCVS.width = onScreenCVS.width/scale/tileSize;
+    offScreenCVS.height = onScreenCVS.height/scale/tileSize;
     tileSizeDisplay.textContent = tileSize;
-    onScreenCTX.clearRect(0,0,onScreenCVS.width,onScreenCVS.height)
+    onScreenCTX.clearRect(0,0,onScreenCVS.width/scale,onScreenCVS.height)
     offScreenCTX.clearRect(0,0,offScreenCVS.width,offScreenCVS.height)
     generateMap();
 }
@@ -735,8 +742,8 @@ function makePath() {
 }
 
 //--------------------------Clear Grid-----------------------------//
-let clearBtn = document.querySelector(".clear-btn")
-let cancelBtn = document.querySelector(".cancel-btn")
+let clearBtn = document.querySelector(".clear-btn");
+let cancelBtn = document.querySelector(".cancel-btn");
 let cancelPath = false;
 
 clearBtn.addEventListener("click", clearGrid);
@@ -760,7 +767,40 @@ function clearGrid(e) {
 //-----------------------Node Efficiency---------------------------//
 //Create an option for mapping key nodes of map to reduce calculation time
 
+//-------------------------Maze methods----------------------------//
+//naive algorithm, not guaranteed solvable, O(n)
+function generateNaiveMaze(e) {
+    onScreenCTX.clearRect(0,0,onScreenCVS.width,onScreenCVS.height);
+    offScreenCTX.clearRect(0,0,offScreenCVS.width,offScreenCVS.height);
+    let imageData = offScreenCTX.getImageData(0,0,offScreenCVS.width,offScreenCVS.height);
+    for (let y = 0; y < imageData.height; y++) {
+        if (y%2 === 1) {
+            continue;
+        }
+        for (let x = 0; x < imageData.width; x++) {
+            if (x%2 === 1) {
+                continue;
+            }
+            offScreenCTX.fillStyle = "black";
+            offScreenCTX.fillRect(x,y,1,1);
+            let rand = [[0,1],[0,-1],[1,0],[-1,0]];
+            let randC = rand[Math.floor(Math.random() * 4)];
+            offScreenCTX.fillRect(x+randC[0],y+randC[1],1,1);
+        }
+    }
+    source = offScreenCVS.toDataURL();
+    renderImage();
+    generateMap();
+}
 //------------------------Maze Generator---------------------------//
+let generateMaze = generateNaiveMaze;
+
+let mazeBtn = document.querySelector(".maze-btn");
+
+mazeBtn.addEventListener("click", generateMaze);
+
+
+
 //Generate a random maze
 //Add options for path width, complexity
 //Algorithms:

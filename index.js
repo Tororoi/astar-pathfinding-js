@@ -443,8 +443,11 @@ function generateMap(e) {
         //check neighbors
         let freeNeighbors = 0;
         function getColor(n) {
-            let clear = "rgba(0, 0, 0, 0)";
-            if (clear === `rgba(${imageData.data[n]}, ${imageData.data[n+1]}, ${imageData.data[n+2]}, ${imageData.data[n+3]})`) {
+            // let clear = "rgba(0, 0, 0, 0)";
+            //if it's not a wall, increment free neighbors
+            let black = "rgba(0, 0, 0, 255)";
+            let color = `rgba(${imageData.data[n]}, ${imageData.data[n+1]}, ${imageData.data[n+2]}, ${imageData.data[n+3]})`
+            if (black != color) {
                 freeNeighbors += 1;
                 return true;
             } else {

@@ -808,6 +808,53 @@ function generateNaiveMaze(e) {
     source = offScreenCVS.toDataURL();
     renderImage();
 }
+// Eller's algorithm
+function generateEllerMaze(e) {
+    cancelPathfinding();
+    offScreenCTX.clearRect(0,0,offScreenCVS.width,offScreenCVS.height);
+    let imageData = offScreenCTX.getImageData(0,0,offScreenCVS.width,offScreenCVS.height);
+    let cells = [];
+    for (let y = 0; y < imageData.height; y++) {
+        if (y%2 === 1) {
+            continue;
+        }
+        for (let x = 0; x < imageData.width; x++) {
+            if (x%2 === 1) {
+                continue;
+            }
+            offScreenCTX.fillStyle = "black";
+            offScreenCTX.fillRect(x,y,1,1);
+            let dirs = [[0,1],[0,-1],[1,0],[-1,0]];
+            dirs.forEach(d => {
+                offScreenCTX.fillRect(x+d[0],y+d[1],1,1);
+            })
+        }
+    }
+    let sets = [];
+    for (let y = 0; y < imageData.height; y++) {
+        if (y%2 === 0) {
+            continue;
+        }
+        cells[y] = [];
+        for (let x = 0; x < imageData.width; x++) {
+            if (x%2 === 0) {
+                continue;
+            }
+            
+            if (!cells[y][x]) {
+                //create each cell in this row if it doesn't exist yet, and add a new set
+                let cell = {x: x, y: y, color: "clear", connections: []}
+                cells[y][x] = cell
+                sets.push(new Set(cell))
+            }
+        }
+        //join adjacent cells randomly and merge sets for connected cells
+        //randomly create new cells connected in the next row down, at least 1 per set (if row is within size of canvas)
+
+    }
+    source = offScreenCVS.toDataURL();
+    renderImage();
+}
 //------------------------Maze Generator---------------------------//
 let generateMaze = generateNaiveMaze;
 

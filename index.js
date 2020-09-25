@@ -534,7 +534,7 @@ function findPath() {
         function recursor() {
             let tile = path[pathIndex]
             onScreenCTX.fillStyle = "rgba(229, 124, 255, 255)"
-            onScreenCTX.fillRect(tile.x*tileSize+1,tile.y*tileSize+1,tileSize-2,tileSize-2)
+            onScreenCTX.fillRect(tile.x*tileSize+0.5,tile.y*tileSize+0.5,tileSize-1,tileSize-1)
             pathIndex+=1;
             if (pathIndex < path.length) {recursor()}
         }

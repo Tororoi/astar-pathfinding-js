@@ -634,7 +634,7 @@ function findPath() {
             if (neighbor.type === "wall" || closed.has(neighbor)) {
                 continue;
             }
-            //Check corners -- FIX
+            //Check corners
             if (dir === "northeast") {
                 if ((current.neighbors.north.type === "wall")&&(current.neighbors.east.type === "wall")) {
                     continue;
@@ -751,6 +751,7 @@ generateBtn.addEventListener("click", makePath);
 generateMap();
 
 function makePath() {
+    generateMap();
     cancelPath = false;
     findPath();
     generateBtn.disabled = true;
@@ -765,6 +766,7 @@ clearBtn.addEventListener("click", clearGrid);
 cancelBtn.addEventListener("click",cancelPathfinding);
 
 function cancelPathfinding() {
+    generateMap();
     cancelPath = true;
     generateBtn.disabled = false;
     // renderImage();

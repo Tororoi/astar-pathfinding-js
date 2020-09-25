@@ -2,11 +2,11 @@
 //Set onscreen canvas and its context
 let onScreenCVS = document.querySelector(".map");
 let onScreenCTX = onScreenCVS.getContext("2d");
-onScreenCVS.width = 2048;
-onScreenCVS.height = 1280;
+onScreenCVS.width = 2048*2;
+onScreenCVS.height = 1280*2;
 onScreenCVS.style.width = "1024px";
 onScreenCVS.style.height = "640px";
-let scale = 2;
+let scale = 2*2;
 onScreenCTX.scale(scale, scale);
 
 
@@ -35,6 +35,7 @@ onScreenCVS.addEventListener('mouseup', handleMouseUp);
 let clicked = false;
 
 function handleMouseMove(e) {
+    // onScreenCTX.fillRect(e.offsetX, e.offsetY, 1, 1)
     if (clicked) {
         draw(e)
         // generateMap();
@@ -409,7 +410,7 @@ function generateMap(e) {
         onScreenCTX.beginPath();
         onScreenCTX.rect(j*tileSize, i*tileSize, tileSize, tileSize);
         onScreenCTX.strokeStyle = "rgb(214, 206, 197)";
-        onScreenCTX.lineWidth = 2;
+        onScreenCTX.lineWidth = 1;
         onScreenCTX.stroke();
       }
   }
@@ -508,14 +509,14 @@ function findPath() {
         function recursor() {
             let tile = path[pathIndex]
             onScreenCTX.fillStyle = "rgb(204,204,255)"
-            onScreenCTX.fillRect(tile.x*tileSize+1,tile.y*tileSize+1,tileSize-2,tileSize-2)
+            onScreenCTX.fillRect(tile.x*tileSize+0.5,tile.y*tileSize+0.5,tileSize-1,tileSize-1)
             if (pathIndex === 0) {
                 onScreenCTX.fillStyle = "rgb(255,248,43)"
-                onScreenCTX.fillRect(tile.x*tileSize+1,tile.y*tileSize+1,tileSize-2,tileSize-2)
+                onScreenCTX.fillRect(tile.x*tileSize+0.5,tile.y*tileSize+0.5,tileSize-1,tileSize-1)
             }
             if (pathIndex === path.length-1) {
                 onScreenCTX.fillStyle = "rgb(97,92,255)"
-                onScreenCTX.fillRect(tile.x*tileSize+1,tile.y*tileSize+1,tileSize-2,tileSize-2)
+                onScreenCTX.fillRect(tile.x*tileSize+0.5,tile.y*tileSize+0.5,tileSize-1,tileSize-1)
                 generateBtn.disabled = false;
             }
             if (path[pathIndex-1]) {
@@ -565,25 +566,25 @@ function findPath() {
         if (mapNodes) {
             freeTiles.forEach(n => {
                 onScreenCTX.fillStyle = "rgb(196, 188, 178)";
-                onScreenCTX.fillRect(n.x*tileSize+1,n.y*tileSize+1,tileSize-2,tileSize-2);
+                onScreenCTX.fillRect(n.x*tileSize+0.5,n.y*tileSize+0.5,tileSize-1,tileSize-1);
             })
         }
         walls.forEach(w => {
             onScreenCTX.fillStyle = "black";
-            onScreenCTX.fillRect(w.x*tileSize+1,w.y*tileSize+1,tileSize-2,tileSize-2);
+            onScreenCTX.fillRect(w.x*tileSize+0.5,w.y*tileSize+0.5,tileSize-1,tileSize-1);
         })
         open.forEach(n => {
             onScreenCTX.fillStyle = "rgb(33,181,235)";
-            onScreenCTX.fillRect(n.x*tileSize+1,n.y*tileSize+1,tileSize-2,tileSize-2);
+            onScreenCTX.fillRect(n.x*tileSize+0.5,n.y*tileSize+0.5,tileSize-1,tileSize-1);
             onScreenCTX.fillStyle = "black";
             onScreenCTX.font = `${tileSize/3}px Arial`;
             onScreenCTX.fillText(n.fCost, n.x*tileSize,n.y*tileSize+(tileSize/2));
         });
         closed.forEach(n => {
             onScreenCTX.fillStyle = `rgba(222,0,0,${n.hCost/n.fCost})`;
-            onScreenCTX.fillRect(n.x*tileSize+1,n.y*tileSize+1,tileSize-2,tileSize-2);
+            onScreenCTX.fillRect(n.x*tileSize+0.5,n.y*tileSize+0.5,tileSize-1,tileSize-1);
             onScreenCTX.fillStyle = `rgba(83,222,2,${n.gCost/n.fCost})`;
-            onScreenCTX.fillRect(n.x*tileSize+1,n.y*tileSize+1,tileSize-2,tileSize-2);
+            onScreenCTX.fillRect(n.x*tileSize+0.5,n.y*tileSize+0.5,tileSize-1,tileSize-1);
         })
         function progressPath() {
             let curr = current;
@@ -596,11 +597,11 @@ function findPath() {
         }
         progressPath()
         onScreenCTX.fillStyle = "orange";
-        onScreenCTX.fillRect(start.x*tileSize+1,start.y*tileSize+1,tileSize-2,tileSize-2);
+        onScreenCTX.fillRect(start.x*tileSize+0.5,start.y*tileSize+0.5,tileSize-1,tileSize-1);
         onScreenCTX.fillStyle = "blue";
-        onScreenCTX.fillRect(end.x*tileSize+1,end.y*tileSize+1,tileSize-2,tileSize-2);
+        onScreenCTX.fillRect(end.x*tileSize+0.5,end.y*tileSize+0.5,tileSize-1,tileSize-1);
         onScreenCTX.fillStyle = "purple";
-        onScreenCTX.fillRect(current.x*tileSize+1,current.y*tileSize+1,tileSize-2,tileSize-2);
+        onScreenCTX.fillRect(current.x*tileSize+0.5,current.y*tileSize+0.5,tileSize-1,tileSize-1);
         onScreenCTX.fillStyle = "black";
         onScreenCTX.fillText(current.fCost, current.x*tileSize,current.y*tileSize+(tileSize/2));
         //------------------------Drawing Done----------------------------//

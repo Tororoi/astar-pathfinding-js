@@ -576,9 +576,11 @@ function findPath() {
         open.forEach(n => {
             onScreenCTX.fillStyle = "rgb(33,181,235)";
             onScreenCTX.fillRect(n.x*tileSize+0.5,n.y*tileSize+0.5,tileSize-1,tileSize-1);
-            onScreenCTX.fillStyle = "black";
-            onScreenCTX.font = `${tileSize/3}px Arial`;
-            onScreenCTX.fillText(n.fCost, n.x*tileSize,n.y*tileSize+(tileSize/2));
+            if (tileSize === 64) {
+                onScreenCTX.fillStyle = "black";
+                onScreenCTX.font = `${tileSize/5}px Arial`;
+                onScreenCTX.fillText(n.fCost, n.x*tileSize,n.y*tileSize+(tileSize/4));
+            }
         });
         closed.forEach(n => {
             onScreenCTX.fillStyle = `rgba(222,0,0,${n.hCost/n.fCost})`;
@@ -602,8 +604,10 @@ function findPath() {
         onScreenCTX.fillRect(end.x*tileSize+0.5,end.y*tileSize+0.5,tileSize-1,tileSize-1);
         onScreenCTX.fillStyle = "purple";
         onScreenCTX.fillRect(current.x*tileSize+0.5,current.y*tileSize+0.5,tileSize-1,tileSize-1);
-        onScreenCTX.fillStyle = "black";
-        onScreenCTX.fillText(current.fCost, current.x*tileSize,current.y*tileSize+(tileSize/2));
+        if (tileSize === 64) {
+            onScreenCTX.fillStyle = "black";
+            onScreenCTX.fillText(current.fCost, current.x*tileSize,current.y*tileSize+(tileSize/4));
+        }
         //------------------------Drawing Done----------------------------//
         //Remove lowest fCost from open and add it to closed
         open.delete(current);

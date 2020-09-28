@@ -835,6 +835,7 @@ function generateEllerMaze(e) {
         if (y%2 === 0) {
             continue;
         }
+        //Initialize empty row
         if (!cells[y]) {cells[y] = []};
         for (let x = 0; x < imageData.width; x++) {
             if (x%2 === 0) {
@@ -843,13 +844,12 @@ function generateEllerMaze(e) {
             
             if (!cells[y][x]) {
                 //create each cell in this row if it doesn't exist yet, and add a new set
-                let cell = {x: x, y: y, color: "clear", connections: []}
+                let cell = {x: x, y: y, setID: connections: []}
                 cells[y][x] = cell
-                sets.push(new Set(cell))
             }
         }
         //join adjacent cells randomly and merge sets for connected cells
-
+        //don't use Sets but instead assign an id, making it easier to merge sets
         //randomly create new cells connected in the next row down, at least 1 per set (if row is within size of canvas)
 
     }

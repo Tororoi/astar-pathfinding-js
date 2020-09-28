@@ -830,7 +830,7 @@ function generateEllerMaze(e) {
             })
         }
     }
-    let sets = [];
+    let numberInSet = [];
     for (let y = 0; y < imageData.height; y++) {
         if (y%2 === 0) {
             continue;
@@ -844,7 +844,7 @@ function generateEllerMaze(e) {
             
             if (!cells[y][x]) {
                 //create each cell in this row if it doesn't exist yet, and add a new set
-                let cell = {x: x, y: y, setID: connections: []}
+                let cell = {x: x, y: y, setID: 0, connections: []}
                 cells[y][x] = cell
             }
         }

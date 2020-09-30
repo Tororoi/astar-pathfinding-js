@@ -831,113 +831,139 @@ function generateEllerMaze(e) {
     //     }
     // }
     let cells = [];
-    // let allSets = {};
     for (let y = 0; y < imageData.height; y++) {
         if (y%2 === 0) {
             continue;
         }
         //Step 1: Initialize empty row if it doesn't exist
+        let rowSets = {};
         if (!cells[y]) {cells[y] = []};
-        for (let x = 0; x < imageData.width; x++) {
+        for (let x = 0; x < imageData.width-2; x++) {
             if (x%2 === 0) {
                 continue;
             }
             
             if (!cells[y][x]) {
                 //Step 2: create each cell in this row if it doesn't exist yet, assign a unique set
-                // let setID = `${y}${x}`;
+                let setID = `${y}${x}`;
                 let uniqueSet = new Set()
-                let cell = {x: x, y: y, set: uniqueSet, connections: {}};
+                let cell = {x: x, y: y, set: setID, connections: {}};
                 cells[y][x] = cell;
                 //add to set
                 uniqueSet.add(cell);
+                //add to row sets
+                rowSets[setID] = uniqueSet;
+            } else {
+                //add existing cells to row sets
+                let cell = cells[y][x];
+                if (rowSets[cell.set]) {
+                    rowSets[cell.set].add(cell);
+                } else {
+                    let uniqueSet = new Set();
+                    uniqueSet.add(cell);
+                    rowSets[cell.set] = uniqueSet;
+                }
             }
         }
         function removeWall() {return Math.random() > 0.5;}
-        let uniqueSets = new Set()
         //Step 3: Create right connections
         cells[y].forEach(c => {
-            //if right cell are in different sets, check remove wall
             let rightCell = cells[y][c.x+2];
+            //if right cell are in different sets, check remove wall
             if (rightCell) {
                 if (c.set !== rightCell.set) {
-                    if (removeWall()) {
+                    if (removeWall() || y===imageData.height-1) {
                         //open the right path
                         c.connections.right = true;
-                        //merge right cell into left cell's set
-                        rightCell.set = c.set;
-                        c.set.add(rightCell);
+                        let oldSet = rightCell.set;
+                        //merge right cell's set into left cell's set
+                        rowSets[oldSet].forEach(rc => {
+                            rc.set = c.set;
+                            rowSets[c.set].add(rc);
+                        })
+                        delete rowSets[oldSet];
                     }
                 }
             }
-            uniqueSets.add(c.set)
         })
         //Step 4: Create down connections
         //only continue if not on last row
-        // console.log(uniqueSets)
-        //something is wrong with this code, creating a ton of sets
-        let setsArr = [...uniqueSets];
         if (y < imageData.height-1) {
-            setsArr.forEach(s => {
+            Object.entries(rowSets).forEach(kv => {
                 let connects = 0;
                 let last;
+                let thisSet = kv[1];
+                let thisSetID = kv[0];
                 //if set only has one entry, create a path down
-                console.log("BEFORE",s)
-                let thisSet = [...s]
                 thisSet.forEach(c => {
-                    if (removeWall() || s.size === 1) {
+                    //check removeWall or if this is the last row of the maze
+                    if (removeWall() || thisSet.size === 1) {
                         //open the down path
                         c.connections.down = true;
                         connects += 1;
                         if (!cells[y+2]) {cells[y+2] = []};
-                        let downCell = {x: c.x, y: y+2, set: c.set, connections: {}};
+                        let downCell = {x: c.x, y: y+2, set: thisSetID, connections: {}};
                         cells[y+2][c.x] = downCell;
-                        //add to set
-                        c.set.add(downCell);
                     }
                     last = c;
                 })
-                console.log("MIDDLE",s)
                 //make sure at least one connects
                 if (connects === 0) {
                     //open the down path
                     last.connections.down = true;
                     if (!cells[y+2]) {cells[y+2] = []};
-                    let downCell = {x: last.x, y: y+2, set: last.set, connections: {}};
+                    let downCell = {x: last.x, y: y+2, set: thisSetID, connections: {}};
                     cells[y+2][last.x] = downCell;
-                    //add to set
-                    last.set.add(downCell);
                 }
-                console.log("AFTER",s)
-                // throw error;
             })
         }
     }
     //draw
-    cells.forEach(row => {
-        if (row) {
-            row.forEach(c => {
-                if (c) {
-                    offScreenCTX.clearRect(c.x,c.y,1,1);
-                    if (c.connections.right) {
-                        offScreenCTX.clearRect(c.x+1,c.y,1,1);
-                    }
-                    if (c.connections.down) {
-                        offScreenCTX.clearRect(c.x,c.y+1,1,1);
-                    }
+    let j = 1;
+    function recursiveDrawMaze() {
+        cells[j].forEach(c => {
+            if (c) {
+                offScreenCTX.clearRect(c.x,c.y,1,1);
+                if (c.connections.right) {
+                    offScreenCTX.clearRect(c.x+1,c.y,1,1);
                 }
-            })
+                if (c.connections.down) {
+                    offScreenCTX.clearRect(c.x,c.y+1,1,1);
+                }
+            }
+        })
+        j+=2;
+        source = offScreenCVS.toDataURL();
+        renderImage();
+        if (j < cells.length) {
+            window.setTimeout(recursiveDrawMaze, 100)
         }
-    })
-    source = offScreenCVS.toDataURL();
-    renderImage();
+    }
+    recursiveDrawMaze();
+    // cells.forEach(row => {
+        // if (row) {
+        //     row.forEach(c => {
+        //         if (c) {
+        //             offScreenCTX.clearRect(c.x,c.y,1,1);
+        //             if (c.connections.right) {
+        //                 offScreenCTX.clearRect(c.x+1,c.y,1,1);
+        //             }
+        //             if (c.connections.down) {
+        //                 offScreenCTX.clearRect(c.x,c.y+1,1,1);
+        //             }
+        //         }
+        //     })
+        // }
+    // })
+    // source = offScreenCVS.toDataURL();
+    // renderImage();
 }
 //------------------------Maze Generator---------------------------//
 let generateMaze = generateNaiveMaze;
 
 let mazeBtn = document.querySelector(".maze-btn");
 
-mazeBtn.addEventListener("click", generateNaiveMaze);
+mazeBtn.addEventListener("click", generateEllerMaze);
 
 
 

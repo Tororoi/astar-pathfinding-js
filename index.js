@@ -961,9 +961,13 @@ function generateEllerMaze(e) {
 //------------------------Maze Generator---------------------------//
 let generateMaze = generateNaiveMaze;
 
-let mazeBtn = document.querySelector(".maze-btn");
+let naiveMazeBtn = document.querySelector(".naive-maze-btn");
 
-mazeBtn.addEventListener("click", generateEllerMaze);
+naiveMazeBtn.addEventListener("click", generateNaiveMaze);
+
+let EllerMazeBtn = document.querySelector(".eller-maze-btn");
+
+EllerMazeBtn.addEventListener("click", generateEllerMaze);
 
 
 

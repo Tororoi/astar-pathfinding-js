@@ -15,6 +15,11 @@ body {
     height: 320px; */
 }
 
+.sidebar {
+    display: flex;
+    flex-flow: column wrap;
+}
+
 .color-select {
     /* display: flex;
     flex-flow: column wrap; */
@@ -26,6 +31,7 @@ body {
 }
 
 .buttons button {
+    /* width: auto; */
     align-self: flex-start;
 }
 

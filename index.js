@@ -953,9 +953,9 @@ let naiveMazeBtn = document.querySelector(".naive-maze-btn");
 
 naiveMazeBtn.addEventListener("click", generateNaiveMaze);
 
-let EllerMazeBtn = document.querySelector(".eller-maze-btn");
+let ellerMazeBtn = document.querySelector(".eller-maze-btn");
 
-EllerMazeBtn.addEventListener("click", generateEllerMaze);
+ellerMazeBtn.addEventListener("click", generateEllerMaze);
 
 
 

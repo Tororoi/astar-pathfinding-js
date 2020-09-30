@@ -20,6 +20,15 @@ body {
     flex-flow: column wrap; */
 }
 
+.buttons {
+    display: flex;
+    flex-flow: column wrap;
+}
+
+.buttons button {
+    align-self: flex-start;
+}
+
 .color {
     display: flex;
 }

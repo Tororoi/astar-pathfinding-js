@@ -106,7 +106,7 @@ function renderImage() {
       if (mapNodes) {
         freeTiles.forEach(n => {
             onScreenCTX.fillStyle = "rgb(196, 188, 178)";
-            onScreenCTX.fillRect(n.x*tileSize+1,n.y*tileSize+1,tileSize-2,tileSize-2);
+            onScreenCTX.fillRect(n.x*tileSize+0.5,n.y*tileSize+0.5,tileSize-1,tileSize-1);
         })
       }
     }

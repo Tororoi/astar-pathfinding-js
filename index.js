@@ -814,23 +814,8 @@ function generateEllerMaze(e) {
     offScreenCTX.fillStyle = "black";
     offScreenCTX.fillRect(0,0,offScreenCVS.width,offScreenCVS.height);
     let imageData = offScreenCTX.getImageData(0,0,offScreenCVS.width,offScreenCVS.height);
-    // for (let y = 0; y < imageData.height; y++) {
-    //     if (y%2 === 1) {
-    //         continue;
-    //     }
-    //     for (let x = 0; x < imageData.width; x++) {
-    //         if (x%2 === 1) {
-    //             continue;
-    //         }
-    //         offScreenCTX.fillStyle = "black";
-    //         offScreenCTX.fillRect(x,y,1,1);
-    //         let dirs = [[0,1],[0,-1],[1,0],[-1,0]];
-    //         dirs.forEach(d => {
-    //             offScreenCTX.fillRect(x+d[0],y+d[1],1,1);
-    //         })
-    //     }
-    // }
     let cells = [];
+    //Generate Maze
     for (let y = 0; y < imageData.height; y++) {
         if (y%2 === 0) {
             continue;
@@ -838,7 +823,7 @@ function generateEllerMaze(e) {
         //Step 1: Initialize empty row if it doesn't exist
         let rowSets = {};
         if (!cells[y]) {cells[y] = []};
-        for (let x = 0; x < imageData.width-2; x++) {
+        for (let x = 0; x < imageData.width; x++) {
             if (x%2 === 0) {
                 continue;
             }
@@ -936,30 +921,13 @@ function generateEllerMaze(e) {
         source = offScreenCVS.toDataURL();
         renderImage();
         if (j < cells.length) {
-            window.setTimeout(recursiveDrawMaze, 100)
+            window.setTimeout(recursiveDrawMaze, 50)
         }
     }
     recursiveDrawMaze();
-    // cells.forEach(row => {
-        // if (row) {
-        //     row.forEach(c => {
-        //         if (c) {
-        //             offScreenCTX.clearRect(c.x,c.y,1,1);
-        //             if (c.connections.right) {
-        //                 offScreenCTX.clearRect(c.x+1,c.y,1,1);
-        //             }
-        //             if (c.connections.down) {
-        //                 offScreenCTX.clearRect(c.x,c.y+1,1,1);
-        //             }
-        //         }
-        //     })
-        // }
-    // })
-    // source = offScreenCVS.toDataURL();
-    // renderImage();
 }
 //------------------------Maze Generator---------------------------//
-let generateMaze = generateNaiveMaze;
+// let generateMaze = generateNaiveMaze;
 
 let naiveMazeBtn = document.querySelector(".naive-maze-btn");
 

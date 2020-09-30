@@ -10,7 +10,11 @@ To make a map for the path to traverse, select a box in the palette to the right
 
 ### Generate Naive Maze
 
-Generates a map automatically, just for walls. Not guaranteed to be solvable and will likely have multiple paths from start to end. Can still be drawn on for custom changes.
+Generates a maze automatically, just for walls. Not guaranteed to be solvable and will likely have multiple paths from start to end. Can still be drawn on for custom changes.
+
+### Generate Eller Maze
+
+Generates a maze row by row, using Eller's Algorithm. Any two points in the maze can reach each other by a single path solution. Using a Manhattan heuristic or corner buffer, there's no reason to use A* pathfinding, as a greedy approach will find the same path (Ignore g(n)).
 
 ## Settings
 

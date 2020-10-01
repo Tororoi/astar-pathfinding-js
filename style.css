@@ -20,6 +20,12 @@ body {
     flex-flow: column wrap;
 }
 
+.sidebar a {
+    color: black;
+    text-decoration: underline;
+    margin: 10px;
+}
+
 .color-select {
     /* display: flex;
     flex-flow: column wrap; */

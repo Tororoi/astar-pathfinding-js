@@ -740,8 +740,9 @@ function findPath() {
         arr.sort(compareFCost)
         current = arr[0]
         if (open.size>0) {setTimeout(recursiveLoop, delaySlider.value)} else {cancelPathfinding()};
+        //instant
+        // if (true) {recursiveLoop()};
     }
-    // }
 }
 //---------------------------Find Path-----------------------------//
 let generateBtn = document.querySelector(".generate-btn")

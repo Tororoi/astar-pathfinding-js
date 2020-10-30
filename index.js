@@ -966,7 +966,7 @@ function generatePrimMaze(e) {
         cells[y] = [];
         for (let x = 0; x < mazeWidth; x++) {
             //Step 2: create each cell in this row
-            let cell = {x: x+xO, y: y, index: [y,x], status: "unvisited", adjacents: [], connection: null};
+            let cell = {x: x+xO, y: y, index: [x,y], status: "unvisited", adjacents: [], connections: []};
             cells[y][x] = cell;
             //add to unvisited set
             unvisited.add(cell);
@@ -1004,6 +1004,7 @@ function generatePrimMaze(e) {
         frontier.delete(current);
         visited.add(current);
         current.status = "visited";
+        offScreenCTX.clearRect(current.x*2,current.y*2,1,1);
         
         //add unvisited adjacent cells to frontier
         function addToFrontier(adjCells) {
@@ -1011,24 +1012,42 @@ function generatePrimMaze(e) {
                 if (c.status === "unvisited") {
                     unvisited.delete(c);
                     frontier.add(c);
-                    c.status = "frontier"
+                    c.status = "frontier";
                     //make current cell the frontier cell's connection
-                    c.connection = current;
+                    c.connections.push(current);
+                } else if (c.status === "frontier") {
+                    c.connections.push(current);
                 }
             }
         }
         addToFrontier(current.adjacents);
         
         //choose random cell from frontier 
-        //HOW TO GET RANDOM ITEM FROM SET?
+        let iteratable = [...frontier.values()];
+        // iteratable.forEach(c => {
+        //     offScreenCTX.fillStyle = "red";
+        //     offScreenCTX.fillRect(c.x*2,c.y*2,1,1);
+        // })
+        let randomIndex = Math.floor(Math.random() * iteratable.length);
+        let frontierCell = iteratable[randomIndex];
 
-        //open wall between frontier cell and its connection
+        //open wall between frontier cell and choose its connection
+        if (frontierCell) {
+            let randomConn = Math.floor(Math.random() * frontierCell.connections.length);
+            let connectX = (frontierCell.x + frontierCell.connections[randomConn].x);
+            let connectY = (frontierCell.y + frontierCell.connections[randomConn].y);
+            offScreenCTX.clearRect(connectX,connectY,1,1);
+        }
+
         //make the frontier cell the new current
+        current = frontierCell;
 
+        source = offScreenCVS.toDataURL();
+        renderImage();
         //while there are still unvisited cells, repeat
-        // if (frontier.size > 0) {
-        //     window.setTimeout(recursiveSpanningTree, delaySlider.value)
-        // }
+        if (frontier.size > 0) {
+            window.setTimeout(recursiveSpanningTree, delaySlider.value)
+        }
     }
 }
 
@@ -1043,9 +1062,9 @@ let ellerMazeBtn = document.querySelector(".eller-maze-btn");
 
 ellerMazeBtn.addEventListener("click", generateEllerMaze);
 
-// let primMazeBtn = document.querySelector(".prim-maze-btn");
+let primMazeBtn = document.querySelector(".prim-maze-btn");
 
-// primMazeBtn.addEventListener("click", generatePrimMaze);
+primMazeBtn.addEventListener("click", generatePrimMaze);
 
 //Generate a random maze
 //Add options for path width, complexity

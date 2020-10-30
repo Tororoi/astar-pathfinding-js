@@ -955,7 +955,6 @@ function generatePrimMaze(e) {
     offScreenCTX.fillRect(0,0,offScreenCVS.width,offScreenCVS.height);
     let imageData = offScreenCTX.getImageData(0,0,offScreenCVS.width,offScreenCVS.height);
     let cells = [];
-    let xO = 0;
     let mazeHeight = imageData.height/2;
     let mazeWidth = imageData.width/2;
     //initialize empty unvisited set
@@ -964,9 +963,10 @@ function generatePrimMaze(e) {
     for (let y = 0; y < mazeHeight; y++) {
         //Step 1: Initialize empty row
         cells[y] = [];
+        // mazeWidth = y+1;
         for (let x = 0; x < mazeWidth; x++) {
             //Step 2: create each cell in this row
-            let cell = {x: x+xO, y: y, index: [x,y], status: "unvisited", adjacents: [], connections: []};
+            let cell = {x: x, y: y, index: [x,y], status: "unvisited", adjacents: [], connections: []};
             cells[y][x] = cell;
             //add to unvisited set
             unvisited.add(cell);
@@ -989,6 +989,7 @@ function generatePrimMaze(e) {
     let visited = new Set();
     let frontier = new Set();
     //get random index pair as starting point and add it to visited set
+    //MAKE EACH ROW A UNIQUE SET TO ALLOW COORDINATE OFFSET?
     let startY = Math.floor(Math.random() * cells.length);
     let startX = Math.floor(Math.random() * cells[startY].length);
     let start = cells[startY][startX];

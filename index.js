@@ -947,6 +947,91 @@ function generateEllerMaze(e) {
     }
     recursiveDrawMaze();
 }
+
+//Prim's Algorithm - spanning tree
+function generatePrimMaze(e) {
+    cancelPathfinding();
+    offScreenCTX.fillStyle = "black";
+    offScreenCTX.fillRect(0,0,offScreenCVS.width,offScreenCVS.height);
+    let imageData = offScreenCTX.getImageData(0,0,offScreenCVS.width,offScreenCVS.height);
+    let cells = [];
+    let xO = 0;
+    let mazeHeight = imageData.height/2;
+    let mazeWidth = imageData.width/2;
+    //initialize empty unvisited set
+    let unvisited = new Set();
+    //Generate grid template
+    for (let y = 0; y < mazeHeight; y++) {
+        //Step 1: Initialize empty row
+        cells[y] = [];
+        for (let x = 0; x < mazeWidth; x++) {
+            //Step 2: create each cell in this row
+            let cell = {x: x+xO, y: y, index: [y,x], status: "unvisited", adjacents: [], connection: null};
+            cells[y][x] = cell;
+            //add to unvisited set
+            unvisited.add(cell);
+            //add adjacents
+            if (cells[y-1]) {
+                if (cells[y-1][x]) {
+                    let up = cells[y-1][x];
+                    cell.adjacents.push(up);
+                    up.adjacents.push(cell);
+                }
+            }
+            if (cells[y][x-1]) {
+                let left = cells[y][x-1];
+                cell.adjacents.push(left);
+                left.adjacents.push(cell);                
+            }
+        }
+    }
+    //initialize empty visited set and frontier set
+    let visited = new Set();
+    let frontier = new Set();
+    //get random index pair as starting point and add it to visited set
+    let startY = Math.floor(Math.random() * cells.length);
+    let startX = Math.floor(Math.random() * cells[startY].length);
+    let start = cells[startY][startX];
+    //Initialize starting cell as frontier
+    unvisited.delete(start);
+    frontier.add(start);
+    //Set start as current
+    let current = start;
+
+    recursiveSpanningTree();
+    function recursiveSpanningTree() {
+        //remove current from unvisited and add it to visited
+        frontier.delete(current);
+        visited.add(current);
+        current.status = "visited";
+        
+        //add unvisited adjacent cells to frontier
+        function addToFrontier(adjCells) {
+            for (let c of adjCells) {
+                if (c.status === "unvisited") {
+                    unvisited.delete(c);
+                    frontier.add(c);
+                    c.status = "frontier"
+                    //make current cell the frontier cell's connection
+                    c.connection = current;
+                }
+            }
+        }
+        addToFrontier(current.adjacents);
+        
+        //choose random cell from frontier 
+        //HOW TO GET RANDOM ITEM FROM SET?
+
+        //open wall between frontier cell and its connection
+        //make the frontier cell the new current
+
+        //while there are still unvisited cells, repeat
+        // if (frontier.size > 0) {
+        //     window.setTimeout(recursiveSpanningTree, delaySlider.value)
+        // }
+    }
+}
+
 //------------------------Maze Generator---------------------------//
 // let generateMaze = generateNaiveMaze;
 
@@ -958,7 +1043,9 @@ let ellerMazeBtn = document.querySelector(".eller-maze-btn");
 
 ellerMazeBtn.addEventListener("click", generateEllerMaze);
 
+// let primMazeBtn = document.querySelector(".prim-maze-btn");
 
+// primMazeBtn.addEventListener("click", generatePrimMaze);
 
 //Generate a random maze
 //Add options for path width, complexity

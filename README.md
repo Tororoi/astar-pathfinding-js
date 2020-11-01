@@ -16,6 +16,10 @@ Generates a naive maze, which is almost a completely random placement of walls. 
 
 Generates a maze row by row, using Eller's Algorithm. Any two points in the maze can reach each other by a single path solution. Using a Manhattan heuristic or corner buffer, there's no reason to use A* pathfinding, as a greedy approach will find the same path (Ignore g(n)).
 
+### Generate Eller Maze
+
+Generates a maze using Prim's Algorithm to create a spanning tree. Any two points in the maze can reach each other by a single path solution. Using a Manhattan heuristic or corner buffer, there's no reason to use A* pathfinding, as a greedy approach will find the same path (Ignore g(n)).
+
 ## Settings
 
 ### Corner Buffer

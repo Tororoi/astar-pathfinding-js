@@ -957,8 +957,6 @@ function generatePrimMaze(e) {
     let cells = [];
     let mazeHeight = imageData.height/2;
     let mazeWidth = imageData.width/2;
-    //initialize empty unvisited set
-    let unvisited = new Set();
     //Generate grid template
     for (let y = 0; y < mazeHeight; y++) {
         //Step 1: Initialize empty row
@@ -968,8 +966,6 @@ function generatePrimMaze(e) {
             //Step 2: create each cell in this row
             let cell = {x: x, y: y, index: [x,y], status: "unvisited", adjacents: [], connections: []};
             cells[y][x] = cell;
-            //add to unvisited set
-            unvisited.add(cell);
             //add adjacents
             if (cells[y-1]) {
                 if (cells[y-1][x]) {
@@ -994,7 +990,6 @@ function generatePrimMaze(e) {
     let startX = Math.floor(Math.random() * cells[startY].length);
     let start = cells[startY][startX];
     //Initialize starting cell as frontier
-    unvisited.delete(start);
     frontier.add(start);
     //Set start as current
     let current = start;
@@ -1011,7 +1006,6 @@ function generatePrimMaze(e) {
         function addToFrontier(adjCells) {
             for (let c of adjCells) {
                 if (c.status === "unvisited") {
-                    unvisited.delete(c);
                     frontier.add(c);
                     c.status = "frontier";
                     //make current cell the frontier cell's connection

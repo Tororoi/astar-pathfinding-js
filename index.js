@@ -1039,9 +1039,12 @@ function generatePrimMaze(e) {
 
         source = offScreenCVS.toDataURL();
         renderImage();
+
         //while there are still unvisited cells, repeat
         if (frontier.size > 0) {
-            window.setTimeout(recursiveSpanningTree, delaySlider.value)
+            // recursiveSpanningTree();
+            // window.requestAnimationFrame(recursiveSpanningTree);
+            window.setTimeout(recursiveSpanningTree, delaySlider.value);
         }
     }
 }
@@ -1060,6 +1063,44 @@ ellerMazeBtn.addEventListener("click", generateEllerMaze);
 let primMazeBtn = document.querySelector(".prim-maze-btn");
 
 primMazeBtn.addEventListener("click", generatePrimMaze);
+
+let deadendBtn = document.querySelector(".deadend-btn");
+
+deadendBtn.addEventListener("click", getDeadends);
+
+//Get deadends
+function getDeadends() {
+    let imageData = offScreenCTX.getImageData(0,0,offScreenCVS.width,offScreenCVS.height);
+
+    for (let i=0; i<imageData.data.length; i+=4) {
+        let x = i/4%offScreenCVS.width, y = (i/4-x)/offScreenCVS.width;
+        let color = `rgba(${imageData.data[i]}, ${imageData.data[i+1]}, ${imageData.data[i+2]}, ${imageData.data[i+3]})`
+        //Clear other pixels of same color
+        if (color === "rgba(0, 0, 0, 0)") {
+            //check adjacents
+            let left = `rgba(${imageData.data[i-4]}, ${imageData.data[i-3]}, ${imageData.data[i-2]}, ${imageData.data[i-1]})`
+            let right = `rgba(${imageData.data[i+4]}, ${imageData.data[i+5]}, ${imageData.data[i+6]}, ${imageData.data[i+7]})`
+            let up = `rgba(${imageData.data[i-imageData.width*4]}, ${imageData.data[i+1-imageData.width*4]}, ${imageData.data[i+2-imageData.width*4]}, ${imageData.data[i+3-imageData.width*4]})`
+            let down = `rgba(${imageData.data[i+imageData.width*4]}, ${imageData.data[i+1+imageData.width*4]}, ${imageData.data[i+2+imageData.width*4]}, ${imageData.data[i+3+imageData.width*4]})`
+            
+            let adjs = [];
+            adjs.push(left,right,up,down);
+            let wallCount = 0;
+            for (c of adjs) {
+                if (c === "rgba(0, 0, 0, 255)") {
+                    wallCount += 1;
+                }
+            }
+            if (wallCount === 3) {
+                offScreenCTX.fillStyle = "red";
+                offScreenCTX.fillRect(x,y,1,1);
+            }
+        }
+    }
+
+    source = offScreenCVS.toDataURL();
+    renderImage();
+}
 
 //Generate a random maze
 //Add options for path width, complexity

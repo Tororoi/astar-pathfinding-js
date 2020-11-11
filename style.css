@@ -53,7 +53,7 @@ body {
 }
 
 .swatch:hover {
-    border: 2px solid red;
+    border: 2px solid rgb(255, 0, 0);
     margin: 9px;
 }
 

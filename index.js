@@ -1089,6 +1089,8 @@ function getDeadends() {
             for (c of adjs) {
                 if (c === "rgba(0, 0, 0, 255)") {
                     wallCount += 1;
+                } else if (c === "rgba(undefined, undefined, undefined, undefined)") {
+                    wallCount += 1;
                 }
             }
             if (wallCount === 3) {
